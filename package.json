@@ -1,0 +1,23 @@
+{
+  "name": "battleship",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CiaranO-C/battleship.git"
+  },
+  "author": "Ciaran OConnell",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CiaranO-C/battleship/issues"
+  },
+  "homepage": "https://github.com/CiaranO-C/battleship#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

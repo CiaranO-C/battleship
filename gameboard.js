@@ -111,6 +111,16 @@ export function Board() {
     console.table(board);
   }
 
+  function recieveAttack(i, j){
+    const target = getCell(i, j);
+    if(target) {
+        target.hit();
+    } else {
+        console.log('miss')
+        return [i, j];
+    }
+  }
+
   function getCell(i, j){
     return board[i][j];
   }
@@ -121,6 +131,7 @@ export function Board() {
     printBoard,
     randomize,
     getCell,
+    recieveAttack,
   };
 }
 

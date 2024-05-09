@@ -1,4 +1,4 @@
-const { Ship, isSunk } = require("./ship");
+import { Ship } from "./ship";
 
 describe("test ship object methods", () => {
     const shipLength = 5;

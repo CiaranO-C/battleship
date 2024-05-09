@@ -2,7 +2,8 @@ import { Ship } from "./ship.js";
 
 export function Board() {
   const board = buildBoard();
-
+  const missedAttacks = [];
+  const totalHits = 0;
   const shipLengths = {
     carrier: 5,
     battleship: 4,
@@ -111,17 +112,30 @@ export function Board() {
     console.table(board);
   }
 
-  function recieveAttack(i, j){
+  function recieveAttack(i, j) {
     const target = getCell(i, j);
-    if(target) {
-        target.hit();
+    if (target) {
+      target.hit();
+      totalHits++;
     } else {
-        console.log('miss')
-        return [i, j];
+      missedAttacks.push([i, j]);
+      return [i, j];
     }
   }
 
-  function getCell(i, j){
+  function shipsSunk() {
+    let sumOfLengths = 0;
+    const lengths = Object.values(shipLengths);
+    lengths.forEach((length) => {
+      sum += length;
+    });
+    if (totalHits === sumOfLengths) {
+      return true;
+    }
+    return false;
+  }
+
+  function getCell(i, j) {
     return board[i][j];
   }
   return {
@@ -132,6 +146,7 @@ export function Board() {
     randomize,
     getCell,
     recieveAttack,
+    shipsSunk,
   };
 }
 
@@ -140,20 +155,3 @@ board.buildBoard();
 console.log("board built");
 board.randomize();
 board.printBoard();
-/*
-const newShip = Ship(3);
-board.placeShip(newShip, 2, 3);
-console.log("ship placed");
-board.printBoard();
-
-console.log("ship 2 attempt");
-newShip.rotate();
-board.placeShip(newShip, 3, 3);
-board.printBoard();
-
-newShip.rotate();
-board.placeShip(newShip, 6, 3);
-board.printBoard();
-
-board.placeShip(newShip, 0, 0);
-board.printBoard();*/

@@ -1,26 +1,133 @@
+@import url(https://fonts.bunny.net/css?family=aldrich:400|alumni-sans-pinstripe:400);
+
 *,
 *::before,
 *::after {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 /* Custom Properties */
 :root {
-    --main-bg-color: rgb(13, 38, 73);
-    --main-text-color: white;
-    --grid-color: white;
+  --main-bg-color: rgb(13, 38, 73);
+  --main-text-color: rgb(208, 227, 255);
+  --grid-color: white;
+  --main-accent-color: rgb(95 161 255);
 }
 
-/* Body */
-body{
-    background-color: var(--main-bg-color);
-    color: var(--main-text-color);
+/* Whole Document */
+body {
+  background-color: var(--main-bg-color);
+  color: var(--main-text-color);
+
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 15px;
+  font-family: inherit;
+  font-size: 12px;
+  background-color: var(--main-accent-color);
 }
 
 /* Header */
 header {
-    display: flex;
-    width: 100vw;
-    height: 80px;
+  height: 80px;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto;
+  align-items: center;
+  font-family: "Aldrich", sans-serif;
+}
+
+h1 {
+  grid-column: 2 / 3;
+  justify-self: center;
+}
+
+#restart {
+  grid-column: 3 / 4;
+  justify-self: end;
+}
+
+/* Main Content */
+main {
+  display: grid;
+  grid-template-columns: 2fr 0.5fr 2fr;
+  grid-template-rows: auto;
+  justify-items: center;
+  margin-top: 70px;
+}
+
+.player-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  border: 3px solid aliceblue;
+  width: 450px;
+  /*height: 450px;*/
+  font-family: "Alumni Sans Pinstripe", sans-serif;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  width: 400px;
+  height: 400px;
+  border: 2px solid white;
+}
+
+.grid-cell {
+  box-sizing: border-box;
+  border: 1px solid white;
+}
+
+.dialogue {
+  width: 200px;
+  height: 30px;
+  border: 1px solid white;
+  text-align: center;
+}
+
+.score-container {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: 50px 1fr;
+
+  border: 1px solid white;
+  font-family: "Aldrich", sans-serif;
+}
+
+.score-title {
+  grid-column: 1 / 4;
+  border: 1px solid white;
+}
+
+.point-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.point {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+
+  background-color: rgb(241, 0, 0);
+}
+
+.divider {
+  border: 1px solid white;
+  height: 100%;
+  margin-left: 8px;
+  margin-right: 8px;
 }

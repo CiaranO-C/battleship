@@ -1,0 +1,26 @@
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+}
+
+/* Custom Properties */
+:root {
+    --main-bg-color: rgb(13, 38, 73);
+    --main-text-color: white;
+    --grid-color: white;
+}
+
+/* Body */
+body{
+    background-color: var(--main-bg-color);
+    color: var(--main-text-color);
+}
+
+/* Header */
+header {
+    display: flex;
+    width: 100vw;
+    height: 80px;
+}

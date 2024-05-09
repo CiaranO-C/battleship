@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Battleship</title>
+    <script type="module" src="./dom.js" defer></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Battleship</h1>
+      <button>Restart</button>
+    </header>
+    <main>
+      <div class="player-container" id="playerOne">
+        <h2>Player One</h2>
+        <div class="grid-container"></div>
+        <div class="dialogue"></div>
+      </div>
+      <div class="score-container">
+        <div class="score-title"><h3>Score</h3></div>
+        <div class="point-container" id="playerOnePoints">
+            <div class="point"></div>
+            <div class="point"></div>
+            <div class="point"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="point-container" id="playerTwoPoints">
+            <div class="point"></div>
+        </div>
+      </div>
+      <div class="player-container" id="playerTwo">
+        <h2>Player Two</h2>
+        <div class="grid-container"></div>
+        <div class="dialogue"></div>
+      </div>
+    </main>
+    <footer><i class="fa-brands fa-github"></i></footer>
+  </body>
+</html>

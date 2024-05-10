@@ -14,10 +14,24 @@ test("Test random index numbers 0-9", () => {
 });
 
 test("recieves attack and updates ship or misses", () => {
-    let [i, j] = [0, 0];
-    testBoard.recieveAttack(i, j);
-    expect(testShip.hitsTaken()).toEqual(1);
-    
-    expect(testBoard.recieveAttack(9, 9)).toEqual([9, 9]);
-    expect(testShip.hitsTaken()).toEqual(1);
+  const [i, j] = [0, 0];
+  testBoard.recieveAttack(i, j);
+  expect(testShip.hitsTaken()).toEqual(1);
+
+  expect(testBoard.recieveAttack(9, 9)).toEqual([9, 9]);
+  expect(testShip.hitsTaken()).toEqual(1);
+});
+
+test("gameboard checks if all ships have sunk", () => {
+  const newBoard = Board();
+  newBoard.randomize();
+  const totalShipCells = 17;
+  expect(newBoard.shipsSunk()).toBeFalsy();
+  //hits entire board to test if ships sunk
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+      newBoard.recieveAttack(i, j);
+    }
+  }
+  expect(newBoard.shipsSunk()).toBeTruthy();
 });

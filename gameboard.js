@@ -3,7 +3,7 @@ import { Ship } from "./ship.js";
 export function Board() {
   const board = buildBoard();
   const missedAttacks = [];
-  const totalHits = 0;
+  let totalHits = 0;
   const shipLengths = {
     carrier: 5,
     battleship: 4,
@@ -127,7 +127,7 @@ export function Board() {
     let sumOfLengths = 0;
     const lengths = Object.values(shipLengths);
     lengths.forEach((length) => {
-      sum += length;
+      sumOfLengths += length;
     });
     if (totalHits === sumOfLengths) {
       return true;

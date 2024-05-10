@@ -1,7 +1,7 @@
 import { Board } from "./gameboard.js";
 
-function Player(name = "Computer") {
-  let title = name;
+export default function Player() {
+  let name = null;
   let board = Board();
   let score = 0;
 
@@ -9,8 +9,13 @@ function Player(name = "Computer") {
     return name;
   }
 
+  function setName(newName) {
+    name = newName;
+  }
+
   return {
     getName,
+    setName,
     board,
   };
 }

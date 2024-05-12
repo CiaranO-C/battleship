@@ -12,6 +12,10 @@ export function Board() {
     "patrol boat": 2,
   };
 
+  function getBoard() {
+    return board;
+  }
+
   function buildBoard() {
     const newBoard = [];
     const boardWidth = 10;
@@ -114,12 +118,17 @@ export function Board() {
 
   function recieveAttack(i, j) {
     const target = getCell(i, j);
-    if (target) {
+    if (target === "") {
+      missedAttacks.push([i, j]);
+      board[i][j] = "O";
+      return false;
+    } else if (target === "O" || target === "X") {
+      return false;
+    } else {
       target.hit();
       totalHits++;
-    } else {
-      missedAttacks.push([i, j]);
-      return [i, j];
+      board[i][j] = "X";
+      return true;
     }
   }
 
@@ -139,7 +148,7 @@ export function Board() {
     return board[i][j];
   }
   return {
-    board,
+    getBoard,
     buildBoard,
     placeShip,
     printBoard,
@@ -153,5 +162,7 @@ export function Board() {
 let board = Board();
 board.buildBoard();
 console.log("board built");
-board.randomize();
+//board.randomize();
 board.printBoard();
+
+

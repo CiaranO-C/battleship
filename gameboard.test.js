@@ -15,10 +15,10 @@ test("Test random index numbers 0-9", () => {
 
 test("recieves attack and updates ship or misses", () => {
   const [i, j] = [0, 0];
-  testBoard.recieveAttack(i, j);
+  expect(testBoard.recieveAttack(i, j)).toBeTruthy();
   expect(testShip.hitsTaken()).toEqual(1);
 
-  expect(testBoard.recieveAttack(9, 9)).toEqual([9, 9]);
+  expect(testBoard.recieveAttack(i,j)).toBeFalsy();
   expect(testShip.hitsTaken()).toEqual(1);
 });
 

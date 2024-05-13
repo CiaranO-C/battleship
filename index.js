@@ -13,11 +13,17 @@ function Game() {
   const playerOne = Player();
   const playerTwo = Player();
   const gui = Dom();
+  let turn = playerOne;
 
   function start() {
     initalisePlayers();
+    disableInputs();
+    playerOne.board.randomize();
+    playerTwo.board.randomize();
     renderBoards();
-    toggleInputs();
+    switchBoard();
+    //disablePlayerBoard
+    //enableOpponent board
     //start round (check turn)
     //player one turn
     //enable click on opponent board
@@ -29,14 +35,69 @@ function Game() {
     //if hit, check opponent isSunk
   }
 
-  function toggleInputs() {
+  function switchBoard() {
+    let playerBoard;
+    let opponentBoard;
+    if (turn === playerOne) {
+      playerBoard = document.querySelector("#playerOne .board");
+      opponentBoard = document.querySelector("#playerTwo .board");
+    } else {
+      playerBoard = document.querySelector("#playerTwo .board");
+      opponentBoard = document.querySelector("#playerOne .board");
+    }
+    dimBoard(playerBoard);
+    enableBoard(opponentBoard);
+    //make player two board clickable
+    //dimPlayerBoard
+    //make own board disabled
+  }
+
+  function enableBoard(board) {
+    board.addEventListener("click", sendAttack);
+
+  }
+
+  function sendAttack(event) {
+    const targetCell = event.target;
+    const i = targetCell.getAttribute("data-i");
+    const j = targetCell.getAttribute("data-j");
+
+    const opponent = getOpponent();
+    const validAttack = opponent.board.recieveAttack(i, j);
+    if (validAttack) {
+      markCell(targetCell, opponent.board.getCell(i, j));
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function markCell(DOMcell, cell) {
+    console.log(cell)
+    if (cell === "O") {
+      DOMcell.classList = "miss";
+    } else {
+      DOMcell.classList = "hit";
+    }
+  }
+
+  function getOpponent() {
+    if (turn === playerOne) {
+      return playerTwo;
+    }
+    return playerOne;
+  }
+
+  function dimBoard(board) {
+    const overlay = board.firstElementChild;
+    overlay.classList.toggle("hidden");
+  }
+
+  function disableInputs() {
     const inputs = document.querySelectorAll(".name-input");
-    for(let i = 0; i < inputs.length; i++){}
+    for (let i = 0; i < inputs.length; i++) {}
     inputs.forEach((input) => {
-    
-    input.setAttribute('readOnly', true);
-      //toggleReadOnly(input);
-      console.log(input);
+      input.setAttribute("readOnly", true);
     });
   }
 
@@ -45,8 +106,6 @@ function Game() {
     const nameTwo = document.getElementById("playerTwoName");
     playerOne.setName(nameOne.value);
     playerTwo.setName(nameTwo.value);
-    toggleReadOnly(nameOne);
-    toggleReadOnly(nameTwo);
   }
 
   function renderBoards() {
@@ -56,7 +115,6 @@ function Game() {
     overlays.forEach((overlay) => {
       overlay.classList.add("hidden");
     });
-    console.log(playerOne.board);
     gui.renderBoard(boardOne, playerOne.board.getBoard());
     gui.renderBoard(boardTwo, playerTwo.board.getBoard());
   }
@@ -71,3 +129,5 @@ function Game() {
 
   return { playerOne, playerTwo, start };
 }
+
+export { game };

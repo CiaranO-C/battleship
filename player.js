@@ -3,10 +3,14 @@ import { Board } from "./gameboard.js";
 export default function Player() {
   let name = null;
   let board = Board();
-  let score = 0;
+  let score = 0; 
 
   function getName() {
     return name;
+  }
+
+  function getScore(){
+    return score;
   }
 
   function setName(newName) {

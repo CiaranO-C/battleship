@@ -58,6 +58,7 @@ export function Board() {
         }
       }
     });
+    printBoard();
   }
 
   function validateCoords(i, j) {
@@ -118,18 +119,25 @@ export function Board() {
 
   function recieveAttack(i, j) {
     const target = getCell(i, j);
-    if (target === "") {
-      missedAttacks.push([i, j]);
-      board[i][j] = "O";
-      return false;
-    } else if (target === "O" || target === "X") {
-      return false;
-    } else {
-      target.hit();
-      totalHits++;
-      board[i][j] = "X";
+    if (validateAttack(target)) {
+      if (target === "") {
+        missedAttacks.push([i, j]);
+        board[i][j] = "O";
+        printBoard();
+      } else {
+        target.hit();
+        totalHits++;
+        board[i][j] = "X";
+        printBoard();
+      }
       return true;
     }
+    return false;
+  }
+
+  function validateAttack(target) {
+    if (target === "O" || target === "X") return false;
+    return true;
   }
 
   function shipsSunk() {
@@ -156,6 +164,7 @@ export function Board() {
     getCell,
     recieveAttack,
     shipsSunk,
+    validateCoords,
   };
 }
 
@@ -164,5 +173,3 @@ board.buildBoard();
 console.log("board built");
 //board.randomize();
 board.printBoard();
-
-

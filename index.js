@@ -3,11 +3,60 @@ import Dom from "./dom.js";
 
 let game;
 const playButton = document.getElementById("playButton");
+const computerName = document.getElementById("computerName");
+const playerTwoName = document.getElementById("playerTwoName");
+const playerTwoSelection = document.querySelector(".player-two-select");
+const scrollDownBtn = document.getElementById("scrollDown");
 
-playButton.addEventListener("click", () => {
-  game = Game();
-  game.start();
+document.addEventListener("DOMContentLoaded", () => {
+  const playerOneNameInput = document.getElementById("playerOneName");
+  //sets caret to end of name input
+  playerOneNameInput.focus();
+  playerOneNameInput.setSelectionRange(1000, 1000);
 });
+
+playerTwoSelection.addEventListener("click", toggleSelection);
+
+function toggleSelection(event) {
+  const selection = event.target;
+  if (selection.classList.contains("name-input")) {
+    const current = document.querySelector(".selected");
+    current.classList.toggle("selected");
+    selection.classList.toggle("selected");
+  }
+}
+
+scrollDownBtn.addEventListener("click", gameSetup, { once: true });
+
+function gameSetup() {
+  game = Game();
+  game.setup();
+  renderPlayerNames();
+  scrollToGame();
+}
+
+function renderPlayerNames() {
+  const nameOne = document.getElementById("playerOneName").value;
+  const nameTwo = document.querySelector(".selected").value;
+  const playerOneName = document.querySelector("#playerOne p");
+  const playerTwoName = document.querySelector("#playerTwo p");
+
+  playerOneName.textContent = nameOne;
+  playerTwoName.textContent = nameTwo;
+}
+
+function scrollToGame() {
+  const gameContainer = document.querySelector(".game-container");
+  gameContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+playButton.addEventListener(
+  "click",
+  () => {
+    game.run();
+  },
+  { once: true },
+);
 
 function Game() {
   const playerOne = Player();
@@ -15,12 +64,14 @@ function Game() {
   const gui = Dom();
   let turn = playerOne;
 
-  function start() {
+  function setup() {
     initalisePlayers();
     disableInputs();
-    playerOne.board.randomize();
-    playerTwo.board.randomize();
     renderBoards();
+    gui.dragAndDrop();
+  }
+
+  function run() {
     switchBoard();
     //disablePlayerBoard
     //enableOpponent board
@@ -47,14 +98,10 @@ function Game() {
     }
     dimBoard(playerBoard);
     enableBoard(opponentBoard);
-    //make player two board clickable
-    //dimPlayerBoard
-    //make own board disabled
   }
 
   function enableBoard(board) {
     board.addEventListener("click", sendAttack);
-
   }
 
   function sendAttack(event) {
@@ -73,7 +120,7 @@ function Game() {
   }
 
   function markCell(DOMcell, cell) {
-    console.log(cell)
+    console.log(cell);
     if (cell === "O") {
       DOMcell.classList = "miss";
     } else {
@@ -90,7 +137,7 @@ function Game() {
 
   function dimBoard(board) {
     const overlay = board.firstElementChild;
-    overlay.classList.toggle("hidden");
+    overlay.classList.toggle("hidden", false);
   }
 
   function disableInputs() {
@@ -103,7 +150,7 @@ function Game() {
 
   function initalisePlayers() {
     const nameOne = document.getElementById("playerOneName");
-    const nameTwo = document.getElementById("playerTwoName");
+    const nameTwo = document.querySelector(".selected");
     playerOne.setName(nameOne.value);
     playerTwo.setName(nameTwo.value);
   }
@@ -113,7 +160,7 @@ function Game() {
     const boardTwo = document.querySelector("#playerTwo .board");
     const overlays = document.querySelectorAll(".overlay");
     overlays.forEach((overlay) => {
-      overlay.classList.add("hidden");
+      overlay.classList.toggle("hidden");
     });
     gui.renderBoard(boardOne, playerOne.board.getBoard());
     gui.renderBoard(boardTwo, playerTwo.board.getBoard());
@@ -127,7 +174,7 @@ function Game() {
     }
   }
 
-  return { playerOne, playerTwo, start };
+  return { playerOne, playerTwo, run, setup };
 }
 
 export { game };

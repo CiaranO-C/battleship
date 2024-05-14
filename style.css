@@ -22,8 +22,7 @@ body {
   background-color: var(--main-bg-color);
   color: var(--main-text-color);
 
-  padding-left: 10px;
-  padding-right: 10px;
+  overflow: hidden;
 }
 
 button {
@@ -47,7 +46,10 @@ input:focus {
 
 /* Header */
 header {
+  position: fixed;
   height: 80px;
+  width: 100%;
+  
 
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -64,26 +66,61 @@ h1 {
 #restart {
   grid-column: 3 / 4;
   justify-self: end;
+  margin-right: 10px;
 }
 
 /* Main Content */
 main {
   display: grid;
-  grid-template-columns: 2fr 0.5fr 2fr;
-  grid-template-rows: 50px auto;
-  justify-items: center;
-  margin-top: 20px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 100vh 100vh;
 }
 
-.player-container {
-  grid-row: 2 / 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 17px;
+.game-start {
+  grid-column: 1 / -1;
+  grid-row: 1 / 2;
 
-  width: 450px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 40% auto;
+  align-items: center;
+  justify-items: center;
+}
+
+.game-start h2 {
+  grid-column: 1 / -1;
+  grid-row: 1 / 2;
+
   font-family: "Alumni Sans Pinstripe", sans-serif;
+}
+
+.game-start input {
+  width: 350px;
+  height: 50px;
+  font-size: 1.5rem;
+}
+
+#playerOneName {
+  align-self: start;
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+
+.player-two-select {
+  display: flex;
+  gap: 20px;
+  align-self: start;
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+}
+
+#computerName {
+    cursor: pointer;
+}
+
+#computerName,
+#playerTwoName {
+  width: 165px;
 }
 
 .name-input {
@@ -97,14 +134,53 @@ main {
   font-size: 15px;
 }
 
+.selected {
+  border: 3px solid white;
+}
+
+#scrollDown {
+  grid-column: 1 / -1;
+  grid-row: 2 / 3;
+  font-family: "Aldrich", sans-serif;
+  color: white;
+  background-color: var(--bg-color-transparent);
+  border: 3px solid var(--accent-light);
+}
+
+#scrollDown:hover {
+  background-color: var(--accent-light);
+}
+
+.game-container {
+  grid-row: 2 / -1;
+  grid-column: 1 / -1;
+
+  display: grid;
+  grid-template-columns: 2fr 0.5fr 2fr;
+  grid-template-rows: 50px auto;
+  justify-items: center;
+  margin-top: 80px;
+}
+
+.player-container {
+  grid-row: 2 / 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  width: 404px;
+  font-family: "Alumni Sans Pinstripe", sans-serif;
+}
+
 .board {
   position: relative;
   display: grid;
   cursor: crosshair;
   grid-template-columns: repeat(10, 1fr);
   grid-template-rows: repeat(10, 1fr);
-  width: 400px;
-  height: 400px;
+  min-width: 400px;
+  min-height: 400px;
   border: 2px solid white;
 }
 
@@ -117,6 +193,36 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.board-tools {
+    display: flex;
+    width: 100%;
+    height: 23%;
+    gap: 10px;
+}
+
+.ship-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    width: 80%;
+    height: 100%;
+    background-color: var(--bg-color-transparent);
+    align-self: start;
+}
+
+.ship-buttons {
+    display: flex;
+    flex-direction: column;
+   justify-content: space-around;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#randomize {
+    padding: 5px;
 }
 
 .start-game-container {
@@ -143,10 +249,41 @@ main {
   background-color: rgba(255, 255, 255, 0.828);
 }
 
+.ship-parent {
+    position: relative;
+    border: 1px dashed white;
+}
+
 .ship {
-  box-sizing: content-box;
+  box-sizing: border-box;
   border: 2px solid rgb(11, 68, 255);
   background-color: rgba(70, 70, 255, 0.629);
+  height: 40px;
+  z-index: 1;
+
+  position: absolute;
+}
+
+#carrierParent,
+.carrier {
+width: 200px;
+}
+
+#battleshipParent,
+.battleship {
+width: 160px;
+}
+
+#destroyerParent,
+#submarineParent,
+.destroyer,
+.submarine {
+width: 120px;
+}
+
+#patrolParent,
+.patrol {
+width: 80px;
 }
 
 .hit {
@@ -155,8 +292,8 @@ main {
 }
 
 .miss {
-    border: 1px solid rgba(31, 222, 252, 0.64);
-    background-color: rgb(73, 164, 178);
+  border: 1px solid rgba(31, 222, 252, 0.64);
+  background-color: rgb(73, 164, 178);
 }
 
 .dialogue {

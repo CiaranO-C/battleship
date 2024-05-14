@@ -6,6 +6,10 @@
     <title>Battleship</title>
     <script type="module" src="./index.js" defer></script>
     <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
   </head>
   <body>
     <header>
@@ -13,7 +17,8 @@
       <button id="restart">Restart</button>
     </header>
     <main>
-      <div class="player-container" id="playerOne">
+      <div class="game-start">
+        <h2>Choose your Name!</h2>
         <input
           class="name-input"
           type="text"
@@ -21,44 +26,82 @@
           id="playerOneName"
           value="Player One"
         />
-        <div class="board">
-          <div class="overlay">
-            <div class="start-game-container">
-              <p>Enter name and click play!</p>
-              <button id="playButton">Play</button>
+        <div class="player-two-select">
+          <input
+            class="name-input selected"
+            type="text"
+            name="name"
+            id="computerName"
+            value="Computer"
+            readonly
+          />
+          <input
+            class="name-input"
+            type="text"
+            name="name"
+            id="playerTwoName"
+            value="Player Two"
+          />
+        </div>
+        <button id="scrollDown">Ready your ships!</button>
+      </div>
+      <div class="game-container">
+        <div class="player-container" id="playerOne">
+          <p>Player One</p>
+          <div class="board">
+            <div class="overlay"></div>
+          </div>
+          <div class="board-tools">
+            <div class="ship-container">
+              <div id="carrierParent" class="ship-parent">
+                <div class="ship carrier"></div>
+              </div>
+              <div id="patrolParent" class="ship-parent">
+                <div class="ship patrol"></div>
+              </div>
+              <div id="battleshipParent" class="ship-parent">
+                <div class="ship battleship"></div>
+              </div>
+              <div id="destroyerParent" class="ship-parent">
+                <div class="ship destroyer"></div>
+              </div>
+              <div id="submarineParent" class="ship-parent">
+                <div class="ship submarine"></div>
+              </div>
+            </div>
+            <div class="ship-buttons">
+              <button class="material-symbols-outlined" id="randomize">
+                shuffle
+              </button>
+              <button class="material-symbols-outlined" id="randomize">
+                cancel
+              </button>
             </div>
           </div>
         </div>
-        <div class="dialogue">Place your ships!</div>
-      </div>
-      <div class="score-container">
-        <div class="score-title"><h3>Score</h3></div>
-        <div class="point-container" id="playerOnePoints">
-          <div class="point"></div>
-          <div class="point"></div>
-          <div class="point"></div>
+        <div class="score-container">
+          <div class="score-title"><h3>Score</h3></div>
+          <div class="point-container" id="playerOnePoints">
+            <div class="point"></div>
+            <div class="point"></div>
+            <div class="point"></div>
+          </div>
+          <div class="divider"></div>
+          <div class="point-container" id="playerTwoPoints">
+            <div class="point"></div>
+          </div>
         </div>
-        <div class="divider"></div>
-        <div class="point-container" id="playerTwoPoints">
-          <div class="point"></div>
-        </div>
-      </div>
-      <div class="player-container" id="playerTwo">
-        <input
-          class="name-input"
-          type="text"
-          name="name"
-          id="playerTwoName"
-          value="Computer"
-        />
-        <div class="board">
-          <div class="overlay hidden">
-            <div class="start-game-container hidden">
-              <p>Enter name and place ships!</p>
+        <div class="player-container" id="playerTwo">
+          <p>Computer</p>
+          <div class="board">
+            <div class="overlay hidden">
+              <div class="start-game-container">
+                <p>Place ships and play!</p>
+                <button id="playButton">Play</button>
+              </div>
             </div>
           </div>
         </div>
-        <div class="dialogue">its your turn!</div>
       </div>
     </main>
     <footer><i class="fa-brands fa-github"></i></footer>

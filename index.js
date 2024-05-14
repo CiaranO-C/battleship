@@ -69,6 +69,7 @@ function Game() {
     disableInputs();
     renderBoards();
     gui.dragAndDrop();
+    gui.shipButtons();
   }
 
   function run() {

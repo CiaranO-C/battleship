@@ -165,6 +165,7 @@ export function Board() {
     recieveAttack,
     shipsSunk,
     validateCoords,
+    getRandomIndex
   };
 }
 

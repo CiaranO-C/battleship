@@ -89,6 +89,7 @@ export default function Dom() {
         toggleSelectedShip(ship);
         startX = event.clientX;
         startY = event.clientY;
+        if(snapped) setAnchor(event);
 
         document.addEventListener("mousemove", moveShip);
         document.addEventListener("mouseup", dropShip);
@@ -97,7 +98,8 @@ export default function Dom() {
       function moveShip(event) {
         if (snapped) {
           const x = checkTolerance(event);
-          console.log(x);
+          console.log(x)
+          if(!x) setAnchor(event);
         } else {
           newX = event.clientX;
           newY = event.clientY;
@@ -117,20 +119,21 @@ export default function Dom() {
       }
 
       function checkTolerance(event) {
-        const tolernace = 40;
+        const tolernace = 20;
         const differenceX = anchorX - event.clientX;
         const differenceY = anchorY - event.clientY;
 
         const xOutOfBounds = Math.abs(differenceX) > tolernace;
         const yOutOfBounds = Math.abs(differenceY) > tolernace;
+
         if (xOutOfBounds || yOutOfBounds) {
-          if (differenceX > 0) {
+          if (differenceX > tolernace) {
             snapLeft();
-          } else if (differenceX < 0) {
+          } else if (differenceX < -tolernace) {
             snapRight();
-          } else if (differenceY > 0) {
+          } else if (differenceY > tolernace) {
             snapUp();
-          } else if (differenceY < 0) {
+          } else if (differenceY < -tolernace) {
             snapDown();
           }
           return false;
@@ -151,7 +154,7 @@ export default function Dom() {
           if (isValid) {
             const canSnap = checkProximity(ship, target);
             if (canSnap) {
-              snapToGrid(ship, target);
+              snapTo(target);
               return true;
             }
           }
@@ -160,8 +163,12 @@ export default function Dom() {
       }
 
       function setAnchor(event) {
-        anchorX = event.clientX;
-        anchorY = event.clientY;
+        const shipRect = ship.getBoundingClientRect();
+        const shipMidX =  ((shipRect.right - shipRect.left)/2) + shipRect.left;
+        const shipMidY = ((shipRect.bottom - shipRect.top)/2) + shipRect.top;
+        
+        anchorX = shipMidX;
+        anchorY = shipMidY;
       }
 
       function snapUp() {
@@ -169,7 +176,8 @@ export default function Dom() {
         const newParent = document.querySelector(
           `.grid-cell[data-i="${i - 1}"][data-j="${j}"]`,
         );
-        console.log(newParent);
+        console.log('up');
+        snapTo(newParent);
       }
 
       function snapDown() {
@@ -177,7 +185,8 @@ export default function Dom() {
         const newParent = document.querySelector(
           `.grid-cell[data-i="${i + 1}"][data-j="${j}"]`,
         );
-        console.log(newParent);
+        console.log('down');
+        snapTo(newParent);
       }
 
       function snapLeft() {
@@ -185,7 +194,8 @@ export default function Dom() {
         const newParent = document.querySelector(
           `.grid-cell[data-i="${i}"][data-j="${j - 1}"]`,
         );
-        console.log(newParent);
+        console.log('left');
+        snapTo(newParent);
       }
 
       function snapRight() {
@@ -193,7 +203,15 @@ export default function Dom() {
         const newParent = document.querySelector(
           `.grid-cell[data-i="${i}"][data-j="${j + 1}"]`,
         );
-        console.log(newParent);
+        console.log('right');
+        snapTo(newParent);
+      }
+
+      function snapTo(targetCell) {
+        snapped = true;
+        console.log(ship)
+        targetCell.appendChild(ship);
+        returnShip();
       }
 
       function dropShip(event) {
@@ -206,14 +224,8 @@ export default function Dom() {
         const cellCoords = cell.getBoundingClientRect();
         const differenceX = Math.floor(shipCoords.x - cellCoords.x);
         const differenceY = Math.floor(shipCoords.y - cellCoords.y);
-        if (differenceX <= 10 && differenceY <= 12) return true;
+        if (differenceX <= 12 && differenceY <= 12) return true;
         return false;
-      }
-
-      function snapToGrid(ship, targetCell) {
-        snapped = true;
-        targetCell.appendChild(ship);
-        returnShip();
       }
 
       function returnShip() {

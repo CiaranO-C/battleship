@@ -70,7 +70,7 @@ export default function Dom() {
 
   function createShip(name, length) {
     const ship = document.createElement("div");
-    ship.classList.add('ship', `${name}`);
+    ship.classList.add("ship", `${name}`);
     ship.setAttribute("data-length", `${length}`);
     ship.setAttribute("data-axis", "horizontal");
     return ship;
@@ -101,15 +101,15 @@ export default function Dom() {
       let snapped;
 
       function selectShip(event) {
-        console.log('selected')
         event.preventDefault();
         event.stopPropagation();
         toggleSelectedShip(ship);
-        updatePosition();
         startX = event.clientX;
         startY = event.clientY;
-        if (snapped) setAnchor(event);
-
+        if (snapped) {
+          setAnchor(event);
+          updatePosition();
+        }
         document.addEventListener("mousemove", moveShip);
         document.addEventListener("mouseup", dropShip);
       }
@@ -201,11 +201,6 @@ export default function Dom() {
           `.grid-cell[data-i="${i - 1}"][data-j="${j}"]`,
         );
         snapTo(newParent);
-        /*   
-        const [shipMidX, shipMidY] = getMidShip();
-        startX = shipMidX;
-        startY = shipMidY;
-        snapped = false;*/
       }
 
       function snapDown() {
@@ -233,9 +228,54 @@ export default function Dom() {
       }
 
       function snapTo(targetCell) {
-        snapped = true;
-        targetCell.appendChild(ship);
-        returnShip();
+        if (validSnap(targetCell)) {
+          snapped = true;
+          targetCell.appendChild(ship);
+          returnShip();
+        } else {
+          const [shipMidX, shipMidY] = getMidShip();
+          startX = shipMidX;
+          startY = shipMidY;
+          snapped = false;
+          return null;
+        }
+      }
+
+      function validSnap(cell) {
+        if (validCell(cell)) {
+          const length = Number(ship.getAttribute("data-length"));
+          const axis = ship.getAttribute("data-axis");
+          let [i, j] = getIndexAttributes(cell);
+          let currentCell;
+          let shipEnd;
+          let isValid;
+
+          if (axis === "horizontal") {
+            shipEnd = j + length;
+            for (j; j < shipEnd; j++) {
+              currentCell = document.querySelector(
+                `.grid-cell[data-i="${i}"][data-j="${j}"]`,
+              );
+              isValid = validCell(currentCell);
+            }
+          } else if (axis === "vertical") {
+            shipEnd = i + length;
+            for (i; i < shipEnd; i++) {
+              currentCell = document.querySelector(
+                `.grid-cell[data-i="${i}"][data-j="${j}"]`,
+              );
+              isValid = validCell(currentCell);
+            }
+          }
+          console.log(isValid);
+          return isValid;
+        } else return false;
+      }
+
+      function validCell(cell) {
+        console.log(cell);
+        if (!cell || cell.classList.contains("occupied")) return false;
+        return true;
       }
 
       function updatePosition() {
@@ -244,26 +284,32 @@ export default function Dom() {
         const axis = ship.getAttribute("data-axis");
         let [i, j] = getIndexAttributes(parentCell);
         let currentCell;
+        let shipEnd;
 
         if (axis === "horizontal") {
-          for (j; j < j + length; j++) {
+          shipEnd = j + length;
+          console.log(j);
+          for (j; j < shipEnd; j++) {
+            currentCell = document.querySelector(
+              `.grid-cell[data-i="${i}"][data-j="${j}"]`,
+            );
+            console.log(j);
+            currentCell.classList.toggle("occupied");
+          }
+        } else if (axis === "vertical") {
+          shipEnd = i + length;
+          for (i; i < shipEnd; i++) {
             currentCell = document.querySelector(
               `.grid-cell[data-i="${i}"][data-j="${j}"]`,
             );
             currentCell.classList.toggle("occupied");
           }
-        } else if (axis === "vertical")
-          for (i; i < i + length; i++) {
-            currentCell = document.querySelector(
-              `.grid-cell[data-i="${i}"][data-j="${j}"]`,
-            );
-            currentCell.classList.toggle("occupied");
-          }
+        }
       }
 
       function dropShip() {
         if (snapped) {
-          //updateGrid()
+          updatePosition();
         } else {
           returnShip();
         }

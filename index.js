@@ -68,8 +68,9 @@ function Game() {
     initalisePlayers();
     disableInputs();
     renderBoards();
-    gui.dragAndDrop();
+    gui.renderDockedShips();
     gui.shipButtons();
+    gui.dragAndDrop();
   }
 
   function run() {

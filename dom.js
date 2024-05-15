@@ -1,4 +1,5 @@
 import { game } from "./index.js";
+import shipsData from "./shipsData.js";
 
 export default function Dom() {
   function renderBoard(container, board) {
@@ -67,13 +68,29 @@ export default function Dom() {
     ship.classList.toggle("selected-ship", true);
   }
 
+  function createShip(name, length) {
+    const ship = document.createElement("div");
+    ship.classList.add('ship', `${name}`);
+    ship.setAttribute("data-length", `${length}`);
+    ship.setAttribute("data-axis", "horizontal");
+    return ship;
+  }
+
+  function renderDockedShips() {
+    shipsData.forEach((ship) => {
+      const [name, length] = ship;
+      const shipDiv = createShip(name, length);
+      const dock = document.getElementById(`${name}Parent`);
+      dock.appendChild(shipDiv);
+    });
+  }
+
   function dragAndDrop() {
     const ships = document.querySelectorAll(".ship");
     let startX = 0;
     let startY = 0;
     let newX = 0;
     let newY = 0;
-    let element;
 
     ships.forEach((ship) => {
       ship.addEventListener("mousedown", selectShip);
@@ -84,12 +101,14 @@ export default function Dom() {
       let snapped;
 
       function selectShip(event) {
+        console.log('selected')
         event.preventDefault();
         event.stopPropagation();
         toggleSelectedShip(ship);
+        updatePosition();
         startX = event.clientX;
         startY = event.clientY;
-        if(snapped) setAnchor(event);
+        if (snapped) setAnchor(event);
 
         document.addEventListener("mousemove", moveShip);
         document.addEventListener("mouseup", dropShip);
@@ -98,8 +117,8 @@ export default function Dom() {
       function moveShip(event) {
         if (snapped) {
           const x = checkTolerance(event);
-          console.log(x)
-          if(!x) setAnchor(event);
+          console.log(x);
+          if (!x) setAnchor(event);
         } else {
           newX = event.clientX;
           newY = event.clientY;
@@ -162,13 +181,18 @@ export default function Dom() {
         return false;
       }
 
-      function setAnchor(event) {
-        const shipRect = ship.getBoundingClientRect();
-        const shipMidX =  ((shipRect.right - shipRect.left)/2) + shipRect.left;
-        const shipMidY = ((shipRect.bottom - shipRect.top)/2) + shipRect.top;
-        
+      function setAnchor() {
+        //achor is reset to middle of ship with every snap
+        const [shipMidX, shipMidY] = getMidShip();
         anchorX = shipMidX;
         anchorY = shipMidY;
+      }
+
+      function getMidShip() {
+        const shipRect = ship.getBoundingClientRect();
+        const midX = (shipRect.right - shipRect.left) / 2 + shipRect.left;
+        const midY = (shipRect.bottom - shipRect.top) / 2 + shipRect.top;
+        return [midX, midY];
       }
 
       function snapUp() {
@@ -176,8 +200,12 @@ export default function Dom() {
         const newParent = document.querySelector(
           `.grid-cell[data-i="${i - 1}"][data-j="${j}"]`,
         );
-        console.log('up');
         snapTo(newParent);
+        /*   
+        const [shipMidX, shipMidY] = getMidShip();
+        startX = shipMidX;
+        startY = shipMidY;
+        snapped = false;*/
       }
 
       function snapDown() {
@@ -185,7 +213,6 @@ export default function Dom() {
         const newParent = document.querySelector(
           `.grid-cell[data-i="${i + 1}"][data-j="${j}"]`,
         );
-        console.log('down');
         snapTo(newParent);
       }
 
@@ -194,7 +221,6 @@ export default function Dom() {
         const newParent = document.querySelector(
           `.grid-cell[data-i="${i}"][data-j="${j - 1}"]`,
         );
-        console.log('left');
         snapTo(newParent);
       }
 
@@ -203,18 +229,44 @@ export default function Dom() {
         const newParent = document.querySelector(
           `.grid-cell[data-i="${i}"][data-j="${j + 1}"]`,
         );
-        console.log('right');
         snapTo(newParent);
       }
 
       function snapTo(targetCell) {
         snapped = true;
-        console.log(ship)
         targetCell.appendChild(ship);
         returnShip();
       }
 
-      function dropShip(event) {
+      function updatePosition() {
+        const parentCell = ship.parentElement;
+        const length = Number(ship.getAttribute("data-length"));
+        const axis = ship.getAttribute("data-axis");
+        let [i, j] = getIndexAttributes(parentCell);
+        let currentCell;
+
+        if (axis === "horizontal") {
+          for (j; j < j + length; j++) {
+            currentCell = document.querySelector(
+              `.grid-cell[data-i="${i}"][data-j="${j}"]`,
+            );
+            currentCell.classList.toggle("occupied");
+          }
+        } else if (axis === "vertical")
+          for (i; i < i + length; i++) {
+            currentCell = document.querySelector(
+              `.grid-cell[data-i="${i}"][data-j="${j}"]`,
+            );
+            currentCell.classList.toggle("occupied");
+          }
+      }
+
+      function dropShip() {
+        if (snapped) {
+          //updateGrid()
+        } else {
+          returnShip();
+        }
         document.removeEventListener("mousemove", moveShip);
         document.removeEventListener("mouseup", dropShip);
       }
@@ -261,5 +313,5 @@ export default function Dom() {
     });
   }
 
-  return { renderBoard, dragAndDrop, shipButtons };
+  return { renderBoard, renderDockedShips, dragAndDrop, shipButtons };
 }

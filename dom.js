@@ -39,6 +39,18 @@ export default function Dom() {
     const width = ship.offsetWidth;
     const height = ship.offsetHeight;
 
+    /*
+    when you try and rotate a ship, it is already placed on the actual grid
+    so i need to be able to access that same original ship rather than making a new one
+    the key thing about this is that i will be able to go to the hashmap and give it the data-id
+    for the correct ship, but i can also store the coordinates where the ship is currently placed
+    that way it makes it very easy to 'move' the ship by first checking if the rotated position is valid
+    (maybe i make a check position function that doesnt need a ship passed in just length, direction, i, j)
+    or i keep the same and just pass in a testShip that will get dumped after....
+    if rotated position is valid then iterate through old coords and make all === '', then finally
+    when placing in new rotated position, store new vertical coordinates!
+    */
+
     if (width >= height) {
       ship.setAttribute("data-position", "vertical");
     } else {
@@ -65,15 +77,16 @@ export default function Dom() {
 
     ships.forEach((ship) => {
       ship.addEventListener("mousedown", selectShip);
-
       let shipTop = 0;
       let shipLeft = 0;
+      let anchorX;
+      let anchorY;
+      let snapped;
 
       function selectShip(event) {
-        toggleSelectedShip(ship);
         event.preventDefault();
         event.stopPropagation();
-        ship.style.pointerEvents = "none";
+        toggleSelectedShip(ship);
         startX = event.clientX;
         startY = event.clientY;
 
@@ -82,43 +95,156 @@ export default function Dom() {
       }
 
       function moveShip(event) {
-        ship.removeEventListener("click", rotateShip);
-        newX = event.clientX;
-        newY = event.clientY;
+        if (snapped) {
+          const x = checkTolerance(event);
+          console.log(x);
+        } else {
+          newX = event.clientX;
+          newY = event.clientY;
 
-        shipTop += newY - startY;
-        shipLeft += newX - startX;
-        ship.style.top = `${shipTop}px`;
-        ship.style.left = `${shipLeft}px`;
+          shipTop += newY - startY;
+          shipLeft += newX - startX;
+          ship.style.top = `${shipTop}px`;
+          ship.style.left = `${shipLeft}px`;
 
-        startX = event.clientX;
-        startY = event.clientY;
+          startX = event.clientX;
+          startY = event.clientY;
 
-        let shipCoords = ship.getBoundingClientRect();
-        let newElement = document.elementFromPoint(
+          if (checkForSnap()) {
+            setAnchor(event);
+          }
+        }
+      }
+
+      function checkTolerance(event) {
+        const tolernace = 40;
+        const differenceX = anchorX - event.clientX;
+        const differenceY = anchorY - event.clientY;
+
+        const xOutOfBounds = Math.abs(differenceX) > tolernace;
+        const yOutOfBounds = Math.abs(differenceY) > tolernace;
+        if (xOutOfBounds || yOutOfBounds) {
+          if (differenceX > 0) {
+            snapLeft();
+          } else if (differenceX < 0) {
+            snapRight();
+          } else if (differenceY > 0) {
+            snapUp();
+          } else if (differenceY < 0) {
+            snapDown();
+          }
+          return false;
+        }
+        return true;
+      }
+
+      function checkForSnap() {
+        const shipCoords = ship.getBoundingClientRect();
+        const elements = document.elementsFromPoint(
           shipCoords.left,
           shipCoords.top,
         );
-        if (element !== newElement) console.log(newElement);
-        element = newElement;
+        const target = elements[1];
+        if (target.classList.contains("grid-cell")) {
+          const [i, j] = getIndexAttributes(target);
+          const isValid = validPosition(getShip(), i, j);
+          if (isValid) {
+            const canSnap = checkProximity(ship, target);
+            if (canSnap) {
+              snapToGrid(ship, target);
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      function setAnchor(event) {
+        anchorX = event.clientX;
+        anchorY = event.clientY;
+      }
+
+      function snapUp() {
+        const [i, j] = getIndexAttributes(ship.parentElement);
+        const newParent = document.querySelector(
+          `.grid-cell[data-i="${i - 1}"][data-j="${j}"]`,
+        );
+        console.log(newParent);
+      }
+
+      function snapDown() {
+        const [i, j] = getIndexAttributes(ship.parentElement);
+        const newParent = document.querySelector(
+          `.grid-cell[data-i="${i + 1}"][data-j="${j}"]`,
+        );
+        console.log(newParent);
+      }
+
+      function snapLeft() {
+        const [i, j] = getIndexAttributes(ship.parentElement);
+        const newParent = document.querySelector(
+          `.grid-cell[data-i="${i}"][data-j="${j - 1}"]`,
+        );
+        console.log(newParent);
+      }
+
+      function snapRight() {
+        const [i, j] = getIndexAttributes(ship.parentElement);
+        const newParent = document.querySelector(
+          `.grid-cell[data-i="${i}"][data-j="${j + 1}"]`,
+        );
+        console.log(newParent);
       }
 
       function dropShip(event) {
-        //make cells able to hold stuff? make them relative for absolute ship?
-        ship.style.pointerEvents = "auto";
-        console.log(event.target);
-        /* if (dropValid) {
-        } else {
-          shipTop = 0;
-          shipLeft = 0;
-          ship.style.top = `${shipTop}px`;
-          ship.style.left = `${shipLeft}px`;
-        }*/
-
-        //console.log(droppedOn);
         document.removeEventListener("mousemove", moveShip);
         document.removeEventListener("mouseup", dropShip);
-        ship.addEventListener("click", rotateShip);
+      }
+
+      function checkProximity(ship, cell) {
+        const shipCoords = ship.getBoundingClientRect();
+        const cellCoords = cell.getBoundingClientRect();
+        const differenceX = Math.floor(shipCoords.x - cellCoords.x);
+        const differenceY = Math.floor(shipCoords.y - cellCoords.y);
+        if (differenceX <= 10 && differenceY <= 12) return true;
+        return false;
+      }
+
+      function snapToGrid(ship, targetCell) {
+        snapped = true;
+        targetCell.appendChild(ship);
+        returnShip();
+      }
+
+      function returnShip() {
+        shipTop = 0;
+        shipLeft = 0;
+        ship.style.top = `${shipTop}px`;
+        ship.style.left = `${shipLeft}px`;
+      }
+
+      function getIndexAttributes(element) {
+        const iString = element.getAttribute("data-i");
+        const jString = element.getAttribute("data-j");
+
+        if (!iString || !jString) return null;
+
+        const i = Number(iString);
+        const j = Number(jString);
+
+        return [i, j];
+      }
+
+      function getShip() {
+        const length = Number(ship.getAttribute("data-length"));
+        const testShip = game.playerOne.board.createShip(length);
+        return testShip;
+      }
+
+      function validPosition(ship, i, j) {
+        const isValid = game.playerOne.board.validatePosition(ship, i, j);
+
+        return isValid;
       }
     });
   }

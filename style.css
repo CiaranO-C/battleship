@@ -49,7 +49,6 @@ header {
   position: fixed;
   height: 80px;
   width: 100%;
-  
 
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -115,7 +114,7 @@ main {
 }
 
 #computerName {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 #computerName,
@@ -196,33 +195,33 @@ main {
 }
 
 .board-tools {
-    display: flex;
-    width: 100%;
-    height: 23%;
-    gap: 10px;
+  display: flex;
+  width: 100%;
+  height: 23%;
+  gap: 10px;
 }
 
 .ship-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
 
-    width: 80%;
-    height: 100%;
-    background-color: var(--bg-color-transparent);
-    align-self: start;
+  width: 80%;
+  height: 100%;
+  background-color: var(--bg-color-transparent);
+  align-self: start;
 }
 
 .ship-buttons {
-    display: flex;
-    flex-direction: column;
-   justify-content: space-around;
-    margin-right: auto;
-    margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 #randomize {
-    padding: 5px;
+  padding: 5px;
 }
 
 .start-game-container {
@@ -235,6 +234,10 @@ main {
 #playButton {
   width: 100px;
   font-size: 18px;
+}
+
+.grid-cell {
+  position: relative;
 }
 
 .grid-cell,
@@ -250,8 +253,8 @@ main {
 }
 
 .ship-parent {
-    position: relative;
-    border: 1px dashed white;
+  position: relative;
+  border: 1px dashed white;
 }
 
 .ship {
@@ -260,30 +263,36 @@ main {
   background-color: rgba(70, 70, 255, 0.629);
   height: 40px;
   z-index: 1;
-
+  cursor: move;
   position: absolute;
+  margin-top: -0.5px;
+  margin-left: -0.5px;
+}
+
+.selected-ship {
+  background-color: rgba(255, 241, 48, 0.629);
 }
 
 #carrierParent,
 .carrier {
-width: 200px;
+  width: 200px;
 }
 
 #battleshipParent,
 .battleship {
-width: 160px;
+  width: 160px;
 }
 
 #destroyerParent,
 #submarineParent,
 .destroyer,
 .submarine {
-width: 120px;
+  width: 120px;
 }
 
 #patrolParent,
 .patrol {
-width: 80px;
+  width: 80px;
 }
 
 .hit {

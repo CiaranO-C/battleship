@@ -2,14 +2,14 @@ import { Board } from "./gameboard.js";
 
 export default function Player() {
   let name = null;
-  let board = Board();
-  let score = 0; 
+  const board = Board();
+  let score = 0;
 
   function getName() {
     return name;
   }
 
-  function getScore(){
+  function getScore() {
     return score;
   }
 
@@ -22,4 +22,19 @@ export default function Player() {
     setName,
     board,
   };
+}
+
+function Computer() {
+  const name = "Computer";
+  const board = Board();
+  let score = 0;
+
+  function getScore() {
+    return score;
+  }
+
+  function playTurn(){
+    const target = board.getRandomIndex();
+    
+  }
 }

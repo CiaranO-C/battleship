@@ -29,6 +29,11 @@ export function Board() {
     return newBoard;
   }
 
+  function createShip(length){
+    const ship = Ship(length);
+    return ship;
+  }
+
   function getRandomIndex() {
     //get random coordinates between 0-9
     const i = Math.floor(Math.random() * 10);
@@ -109,7 +114,7 @@ export function Board() {
       });
     } else {
       console.error(`invalid position -> ${i}, ${j}`);
-      return null;
+      return false;
     }
     return true;
   }
@@ -165,7 +170,9 @@ export function Board() {
     recieveAttack,
     shipsSunk,
     validateCoords,
-    getRandomIndex
+    getRandomIndex,
+    validatePosition,
+    createShip
   };
 }
 

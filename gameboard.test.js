@@ -18,7 +18,7 @@ test("recieves attack and updates ship or misses", () => {
   expect(testBoard.recieveAttack(i, j)).toBeTruthy();
   expect(testShip.hitsTaken()).toEqual(1);
 
-  expect(testBoard.recieveAttack(i,j)).toBeFalsy();
+  expect(testBoard.recieveAttack(i, j)).toBeFalsy();
   expect(testShip.hitsTaken()).toEqual(1);
 });
 

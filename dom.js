@@ -16,6 +16,47 @@ export default function Dom() {
     }
   }
 
+  function getAllShips() {
+    const ships = document.querySelectorAll(".ship");
+    return ships;
+  }
+
+  function getRandomIndex() {
+    //random between 0-9
+    const i = Math.floor(Math.random() * 10);
+    const j = Math.floor(Math.random() * 10);
+    return [i, j];
+  }
+
+  function randomize() {
+    const allShips = getAllShips();
+    allShips.forEach((ship) => {
+      toggleSelectedShip(ship);
+      if (ship.parentElement.classList.contains("grid-cell")) {
+        console.log("clearing!");
+        clearPosition();
+      }
+      let shipPlaced = false;
+      while (!shipPlaced) {
+        const [i, j] = getRandomIndex();
+        const parentCell = getCell(i, j);
+        if (validSnap(parentCell)) {
+          parentCell.appendChild(ship);
+          setPosition();
+          shipPlaced = true;
+        } else {
+          toggleAxis(ship);
+          spin();
+          if (validSnap(parentCell)) {
+            parentCell.appendChild(ship);
+            setPosition();
+            shipPlaced = true;
+          }
+        }
+      }
+    });
+  }
+
   function getPlayerScore(player) {
     const score = player.getScore();
     return score;
@@ -31,41 +72,79 @@ export default function Dom() {
 
   function shipButtons() {
     const rotate = document.getElementById("rotateShip");
+    const random = document.getElementById("randomize");
+    const reset = document.getElementById("returnShips");
+
     rotate.addEventListener("click", rotateShip);
+    random.addEventListener("click", randomize);
+    reset.addEventListener("click", dockShips);
   }
 
-  function rotateShip() {
-    const ship = document.querySelector(".selected-ship");
+  function dockShips() {
+    const ships = getAllShips();
+    ships.forEach((ship) => {
+      toggleSelectedShip(ship);
+      clearPosition();
+      ship.remove();
+    });
+    renderDockedShips();
+    dragAndDrop();
+  }
 
+  function spin() {
+    const ship = getSelectedShip();
     const width = ship.offsetWidth;
     const height = ship.offsetHeight;
-
-    /*
-    when you try and rotate a ship, it is already placed on the actual grid
-    so i need to be able to access that same original ship rather than making a new one
-    the key thing about this is that i will be able to go to the hashmap and give it the data-id
-    for the correct ship, but i can also store the coordinates where the ship is currently placed
-    that way it makes it very easy to 'move' the ship by first checking if the rotated position is valid
-    (maybe i make a check position function that doesnt need a ship passed in just length, direction, i, j)
-    or i keep the same and just pass in a testShip that will get dumped after....
-    if rotated position is valid then iterate through old coords and make all === '', then finally
-    when placing in new rotated position, store new vertical coordinates!
-    */
-
-    if (width >= height) {
-      ship.setAttribute("data-position", "vertical");
-    } else {
-      ship.setAttribute("data-position", "horizontal");
-    }
-
     ship.style.height = `${width}px`;
     ship.style.width = `${height}px`;
   }
 
+  function rotateShip() {
+    const ship = getSelectedShip();
+    if (ship) {
+      const shipOnGrid = ship.parentElement.classList.contains("grid-cell");
+
+      if (shipOnGrid) {
+        const parentCell = ship.parentElement;
+        console.log("parent:");
+        console.log(parentCell);
+        clearPosition(); // clear current position to stop parent cell interfering with validation
+        console.log("previous cells:");
+        console.log(parentCell);
+        console.log(parentCell.nextElementSibling);
+        toggleAxis(ship);
+        if (validSnap(parentCell)) {
+          console.log("new cells valid, ship flipped:");
+          console.log(ship);
+          const width = ship.offsetWidth;
+          const height = ship.offsetHeight;
+          ship.style.height = `${width}px`;
+          ship.style.width = `${height}px`;
+        } else {
+          toggleAxis(ship);
+          return false;
+        }
+        setPosition();
+      }
+    }
+  }
+
+  function toggleAxis(ship) {
+    const axis = ship.getAttribute("data-axis");
+    axis === "horizontal"
+      ? ship.setAttribute("data-axis", "vertical")
+      : ship.setAttribute("data-axis", "horizontal");
+  }
+
   function toggleSelectedShip(ship) {
-    const oldShip = document.querySelector(".selected-ship");
+    const oldShip = getSelectedShip();
     if (oldShip) oldShip.classList.toggle("selected-ship", false);
     ship.classList.toggle("selected-ship", true);
+  }
+
+  function getSelectedShip() {
+    const selected = document.querySelector(".selected-ship");
+    return selected;
   }
 
   function createShip(name, length) {
@@ -99,6 +178,88 @@ export default function Dom() {
     const axis = ship.getAttribute("data-axis");
 
     return { name, length, axis };
+  }
+
+  function validSnap(startCell) {
+    //check first cell is valid before checking array of cells
+    if (validCell(startCell)) {
+      const cells = getCellsArray(startCell);
+      if (validateCells(cells)) return true;
+    } else return false;
+  }
+
+  function validCell(cell) {
+    if (!cell || cell.classList.contains("occupied")) {
+      return false;
+    }
+    return true;
+  }
+
+  function getCellsArray(startCell, ship = getSelectedShip()) {
+    const { length, axis } = getShipInfo(ship);
+    let [i, j] = getIndexAttributes(startCell);
+
+    const cells = [];
+    const isHorizontal = axis === "horizontal";
+
+    let n = isHorizontal ? j : i;
+    const shipEnd = n + length;
+    let currentCell;
+
+    for (n; n < shipEnd; n++) {
+      if (isHorizontal) {
+        currentCell = getCell(i, n);
+      } else {
+        currentCell = getCell(n, j);
+      }
+      cells.push(currentCell);
+    }
+    return cells;
+  }
+
+  function validateCells(cells) {
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i];
+      const isValid = validCell(cell);
+      if (isValid === false) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function getIndexAttributes(element) {
+    const iString = element.getAttribute("data-i");
+    const jString = element.getAttribute("data-j");
+
+    if (!iString || !jString) return null;
+
+    const i = Number(iString);
+    const j = Number(jString);
+
+    return [i, j];
+  }
+
+  function setPosition(ship = getSelectedShip()) {
+    const cells = getCellsArray(ship.parentElement);
+    if (validateCells(cells)) {
+      const { name } = getShipInfo(ship);
+      cells.forEach((cell) => {
+        cell.setAttribute("data-id", `${name}`);
+        cell.classList.add("occupied");
+      });
+    }
+  }
+
+
+  function clearPosition(ship = getSelectedShip()) {
+    const { name } = getShipInfo(ship);
+    const cells = document.querySelectorAll(`.grid-cell[data-id="${name}"]`);
+
+    cells.forEach((cell) => {
+      cell.removeAttribute("data-id");
+      cell.classList.remove("occupied");
+    });
   }
 
   function dragAndDrop() {
@@ -169,7 +330,7 @@ export default function Dom() {
       }
 
       function checkTolerance(event) {
-        const tolernace = 20;
+        const tolernace = 30;
         const differenceX = anchorX - event.clientX;
         const differenceY = anchorY - event.clientY;
 
@@ -199,11 +360,9 @@ export default function Dom() {
         );
         //elements[1] will return element directly underneath ship
         const target = elements[1];
-        console.log(target);
-        if (target.classList.contains("grid-cell")) {
+        if (target !== undefined && target.classList.contains("grid-cell")) {
           const isValid = validSnap(target);
           if (isValid) {
-            console.log("checking");
             const canSnap = checkProximity(ship, target);
             if (canSnap) {
               snapTo(target);
@@ -277,77 +436,6 @@ export default function Dom() {
         snapped = false;
       }
 
-      function validSnap(startCell) {
-        //check first cell is valid before checking array of cells
-        if (validCell(startCell)) {
-          const cells = getCellsArray(startCell);
-          if (validateCells(cells)) return true;
-        } else return false;
-      }
-
-      function validateCells(cells) {
-        for (let i = 0; i < cells.length; i++) {
-          const cell = cells[i];
-          const isValid = validCell(cell);
-          if (isValid === false) {
-            return false;
-          }
-        }
-        return true;
-      }
-
-      function getCellsArray(startCell) {
-        const { length, axis } = getShipInfo(ship);
-        let [i, j] = getIndexAttributes(startCell);
-
-        const cells = [];
-        const isHorizontal = axis === "horizontal";
-
-        let n = isHorizontal ? j : i;
-        const shipEnd = n + length;
-        let currentCell;
-
-        for (n; n < shipEnd; n++) {
-          if (isHorizontal) {
-            currentCell = getCell(i, n);
-          } else {
-            currentCell = getCell(n, i);
-          }
-          cells.push(currentCell);
-        }
-        //console.log(cells)
-        return cells;
-      }
-
-      function validCell(cell) {
-        if (!cell || cell.classList.contains("occupied")) {
-          return false;
-        }
-        return true;
-      }
-
-      function setPosition() {
-        const cells = getCellsArray(ship.parentElement);
-        if (validateCells(cells)) {
-          const { name } = getShipInfo(ship);
-          cells.forEach((cell) => {
-            cell.setAttribute("data-id", `${name}`);
-            cell.classList.add("occupied");
-          });
-        }
-      }
-
-      function clearPosition() {
-        const cells = getCellsArray(ship.parentElement);
-        if (validateCells(cells)) {
-          console.log(cells);
-          cells.forEach((cell) => {
-            cell.removeAttribute("data-id");
-            cell.classList.remove("occupied");
-          });
-        }
-      }
-
       function dropShip() {
         if (snapped) {
           setPosition();
@@ -372,18 +460,6 @@ export default function Dom() {
         shipLeft = 0;
         ship.style.top = `${shipTop}px`;
         ship.style.left = `${shipLeft}px`;
-      }
-
-      function getIndexAttributes(element) {
-        const iString = element.getAttribute("data-i");
-        const jString = element.getAttribute("data-j");
-
-        if (!iString || !jString) return null;
-
-        const i = Number(iString);
-        const j = Number(jString);
-
-        return [i, j];
       }
 
       function getShip() {

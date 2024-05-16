@@ -73,6 +73,7 @@ export default function Dom() {
     ship.classList.add("ship", `${name}`);
     ship.setAttribute("data-length", `${length}`);
     ship.setAttribute("data-axis", "horizontal");
+    ship.setAttribute("data-name", `${name}`);
     return ship;
   }
 
@@ -85,20 +86,37 @@ export default function Dom() {
     });
   }
 
+  function getCell(i, j) {
+    const cell = document.querySelector(
+      `.grid-cell[data-i="${i}"][data-j="${j}"]`,
+    );
+    return cell;
+  }
+
+  function getShipInfo(ship) {
+    const name = ship.getAttribute("data-name");
+    const length = Number(ship.getAttribute("data-length"));
+    const axis = ship.getAttribute("data-axis");
+
+    return { name, length, axis };
+  }
+
   function dragAndDrop() {
     const ships = document.querySelectorAll(".ship");
+    const board = document.querySelector("#playerOne .board");
     let startX = 0;
     let startY = 0;
     let newX = 0;
     let newY = 0;
 
     ships.forEach((ship) => {
-      ship.addEventListener("mousedown", selectShip);
       let shipTop = 0;
       let shipLeft = 0;
       let anchorX;
       let anchorY;
       let snapped;
+
+      ship.addEventListener("mousedown", selectShip);
 
       function selectShip(event) {
         event.preventDefault();
@@ -108,17 +126,30 @@ export default function Dom() {
         startY = event.clientY;
         if (snapped) {
           setAnchor(event);
-          updatePosition();
+          clearPosition();
         }
         document.addEventListener("mousemove", moveShip);
         document.addEventListener("mouseup", dropShip);
       }
 
+      function checkWithinBoard(shipX, shipY) {
+        const boardXY = board.getBoundingClientRect();
+        const isWithin =
+          shipX >= boardXY.left &&
+          shipX <= boardXY.right &&
+          shipY >= boardXY.top &&
+          shipY <= boardXY.bottom;
+
+        return isWithin;
+      }
+
       function moveShip(event) {
+        const shipRect = ship.getBoundingClientRect();
         if (snapped) {
-          const x = checkTolerance(event);
-          console.log(x);
-          if (!x) setAnchor(event);
+          clearPosition();
+
+          const withinTolerance = checkTolerance(event);
+          if (!withinTolerance) setAnchor(event);
         } else {
           newX = event.clientX;
           newY = event.clientY;
@@ -130,8 +161,8 @@ export default function Dom() {
 
           startX = event.clientX;
           startY = event.clientY;
-
-          if (checkForSnap()) {
+          if (checkWithinBoard(shipRect.left, shipRect.top)) {
+            checkForSnap();
             setAnchor(event);
           }
         }
@@ -166,11 +197,13 @@ export default function Dom() {
           shipCoords.left,
           shipCoords.top,
         );
+        //elements[1] will return element directly underneath ship
         const target = elements[1];
+        console.log(target);
         if (target.classList.contains("grid-cell")) {
-          const [i, j] = getIndexAttributes(target);
-          const isValid = validPosition(getShip(), i, j);
+          const isValid = validSnap(target);
           if (isValid) {
+            console.log("checking");
             const canSnap = checkProximity(ship, target);
             if (canSnap) {
               snapTo(target);
@@ -233,83 +266,91 @@ export default function Dom() {
           targetCell.appendChild(ship);
           returnShip();
         } else {
-          const [shipMidX, shipMidY] = getMidShip();
-          startX = shipMidX;
-          startY = shipMidY;
-          snapped = false;
-          return null;
+          unSnap();
         }
       }
 
-      function validSnap(cell) {
-        if (validCell(cell)) {
-          const length = Number(ship.getAttribute("data-length"));
-          const axis = ship.getAttribute("data-axis");
-          let [i, j] = getIndexAttributes(cell);
-          let currentCell;
-          let shipEnd;
-          let isValid;
+      function unSnap() {
+        const [shipMidX, shipMidY] = getMidShip();
+        startX = shipMidX;
+        startY = shipMidY;
+        snapped = false;
+      }
 
-          if (axis === "horizontal") {
-            shipEnd = j + length;
-            for (j; j < shipEnd; j++) {
-              currentCell = document.querySelector(
-                `.grid-cell[data-i="${i}"][data-j="${j}"]`,
-              );
-              isValid = validCell(currentCell);
-            }
-          } else if (axis === "vertical") {
-            shipEnd = i + length;
-            for (i; i < shipEnd; i++) {
-              currentCell = document.querySelector(
-                `.grid-cell[data-i="${i}"][data-j="${j}"]`,
-              );
-              isValid = validCell(currentCell);
-            }
-          }
-          console.log(isValid);
-          return isValid;
+      function validSnap(startCell) {
+        //check first cell is valid before checking array of cells
+        if (validCell(startCell)) {
+          const cells = getCellsArray(startCell);
+          if (validateCells(cells)) return true;
         } else return false;
       }
 
-      function validCell(cell) {
-        console.log(cell);
-        if (!cell || cell.classList.contains("occupied")) return false;
+      function validateCells(cells) {
+        for (let i = 0; i < cells.length; i++) {
+          const cell = cells[i];
+          const isValid = validCell(cell);
+          if (isValid === false) {
+            return false;
+          }
+        }
         return true;
       }
 
-      function updatePosition() {
-        const parentCell = ship.parentElement;
-        const length = Number(ship.getAttribute("data-length"));
-        const axis = ship.getAttribute("data-axis");
-        let [i, j] = getIndexAttributes(parentCell);
-        let currentCell;
-        let shipEnd;
+      function getCellsArray(startCell) {
+        const { length, axis } = getShipInfo(ship);
+        let [i, j] = getIndexAttributes(startCell);
 
-        if (axis === "horizontal") {
-          shipEnd = j + length;
-          console.log(j);
-          for (j; j < shipEnd; j++) {
-            currentCell = document.querySelector(
-              `.grid-cell[data-i="${i}"][data-j="${j}"]`,
-            );
-            console.log(j);
-            currentCell.classList.toggle("occupied");
+        const cells = [];
+        const isHorizontal = axis === "horizontal";
+
+        let n = isHorizontal ? j : i;
+        const shipEnd = n + length;
+        let currentCell;
+
+        for (n; n < shipEnd; n++) {
+          if (isHorizontal) {
+            currentCell = getCell(i, n);
+          } else {
+            currentCell = getCell(n, i);
           }
-        } else if (axis === "vertical") {
-          shipEnd = i + length;
-          for (i; i < shipEnd; i++) {
-            currentCell = document.querySelector(
-              `.grid-cell[data-i="${i}"][data-j="${j}"]`,
-            );
-            currentCell.classList.toggle("occupied");
-          }
+          cells.push(currentCell);
+        }
+        //console.log(cells)
+        return cells;
+      }
+
+      function validCell(cell) {
+        if (!cell || cell.classList.contains("occupied")) {
+          return false;
+        }
+        return true;
+      }
+
+      function setPosition() {
+        const cells = getCellsArray(ship.parentElement);
+        if (validateCells(cells)) {
+          const { name } = getShipInfo(ship);
+          cells.forEach((cell) => {
+            cell.setAttribute("data-id", `${name}`);
+            cell.classList.add("occupied");
+          });
+        }
+      }
+
+      function clearPosition() {
+        const cells = getCellsArray(ship.parentElement);
+        if (validateCells(cells)) {
+          console.log(cells);
+          cells.forEach((cell) => {
+            cell.removeAttribute("data-id");
+            cell.classList.remove("occupied");
+          });
         }
       }
 
       function dropShip() {
         if (snapped) {
-          updatePosition();
+          setPosition();
         } else {
           returnShip();
         }

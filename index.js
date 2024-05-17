@@ -91,8 +91,7 @@ function Game() {
 
   function confirmAllShips() {
     const validShips = gui.confirmShips();
-    console.log(validShips)
-   // if (validShips) {
+    if (validShips) {
       validShips.forEach((ship) => {
         let newShip;
         const { i, j, length, axis } = ship;
@@ -104,7 +103,7 @@ function Game() {
         playerOne.board.placeShip(newShip, i, j);
         console.log('maybe placed')
       });
-   // }
+    }
     playerOne.board.printBoard();
   }
 

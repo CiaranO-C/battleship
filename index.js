@@ -1,9 +1,9 @@
-import Player from "./player.js";
+import { Player, Computer } from "./player.js";
 import Dom from "./dom.js";
 
 let game;
 const playButton = document.getElementById("playButton");
-const computerName = document.getElementById("computerName");
+const computerName = document.getElementById("computer");
 const playerTwoName = document.getElementById("playerTwoName");
 const playerTwoSelection = document.querySelector(".player-two-select");
 const scrollDownBtn = document.getElementById("scrollDown");
@@ -59,8 +59,7 @@ playButton.addEventListener(
 );
 
 function Game() {
-  const playerOne = Player();
-  const playerTwo = Player();
+  const { playerOne, playerTwo } = initalisePlayers();
   const gui = Dom();
   let turn = playerOne;
 
@@ -105,6 +104,8 @@ function Game() {
     }
     playerOne.board.printBoard();
   }
+
+  function switchTurn() {}
 
   function switchBoard() {
     let playerBoard;
@@ -169,10 +170,19 @@ function Game() {
   }
 
   function initalisePlayers() {
-    const nameOne = document.getElementById("playerOneName");
-    const nameTwo = document.querySelector(".selected");
-    playerOne.setName(nameOne.value);
-    playerTwo.setName(nameTwo.value);
+    const playerOne = Player();
+    const playerOneName = document.getElementById("playerOneName");
+    playerOne.setName(playerOneName.value);
+
+    let playerTwo;
+    const selected = document.querySelector(".selected");
+    if (selected.id === "computer") {
+      playerTwo = Computer();
+    } else {
+      playerTwo = Player();
+      playerTwo.setName(selected.value);
+    }
+    return { playerOne, playerTwo };
   }
 
   function renderBoards() {

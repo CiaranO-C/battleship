@@ -1,6 +1,6 @@
 import { Board } from "./gameboard.js";
 
-export default function Player() {
+function Player() {
   let name = null;
   const board = Board();
   let score = 0;
@@ -13,6 +13,11 @@ export default function Player() {
     return score;
   }
 
+  function incrementScore() {
+    score++;
+    return score;
+  }
+
   function setName(newName) {
     name = newName;
   }
@@ -20,21 +25,29 @@ export default function Player() {
   return {
     getName,
     setName,
+    getScore,
+    incrementScore,
     board,
   };
 }
 
 function Computer() {
-  const name = "Computer";
-  const board = Board();
-  let score = 0;
+  const player = Player();
+  const { board, score, getScore, getName, setName, incrementScore } = player;
 
-  function getScore() {
-    return score;
-  }
+  setName("Computer");
 
-  function playTurn(){
+  function playTurn() {
     const target = board.getRandomIndex();
-    
   }
+
+  return {
+    getName,
+    getScore,
+    incrementScore,
+    playTurn,
+    board,
+  };
 }
+
+export { Player, Computer };

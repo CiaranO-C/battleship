@@ -74,7 +74,8 @@ function Game() {
   }
 
   function run() {
-    switchBoard();
+    confirmAllShips();
+    //switchBoard();
     //disablePlayerBoard
     //enableOpponent board
     //start round (check turn)
@@ -86,6 +87,25 @@ function Game() {
     //new .hit and .miss class css
     //
     //if hit, check opponent isSunk
+  }
+
+  function confirmAllShips() {
+    const validShips = gui.confirmShips();
+    console.log(validShips)
+   // if (validShips) {
+      validShips.forEach((ship) => {
+        let newShip;
+        const { i, j, length, axis } = ship;
+        if (axis === "vertical") {
+          newShip = playerOne.board.createShip(length, axis);
+        } else {
+          newShip = playerOne.board.createShip(length);
+        }
+        playerOne.board.placeShip(newShip, i, j);
+        console.log('maybe placed')
+      });
+   // }
+    playerOne.board.printBoard();
   }
 
   function switchBoard() {

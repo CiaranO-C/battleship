@@ -57,6 +57,36 @@ export default function Dom() {
     });
   }
 
+  function allShipsPlaced() {
+    const ships = getAllShips();
+    console.log(ships)
+    for (let i = 0; i < ships.length; i++) {
+      const ship = ships[i];
+      const parent = ship.parentElement;
+      const shipOnGrid = parent.classList.contains("grid-cell");
+      if (!shipOnGrid) return false;
+    }
+    return true;
+  }
+
+  function confirmShips() {
+    if (allShipsPlaced()) {
+        console.log('all placed')
+      const shipArray = [];
+      const ships = getAllShips();
+      ships.forEach((ship) => {
+        const parentCell = ship.parentElement;
+        const [i, j] = getIndexAttributes(parentCell);
+        const { length, axis } = getShipInfo(ship);
+        const shipPackage = { i, j, length, axis };
+        shipArray.push(shipPackage);
+      });
+      return shipArray;
+    }
+
+    return null;
+  }
+
   function getPlayerScore(player) {
     const score = player.getScore();
     return score;
@@ -250,7 +280,6 @@ export default function Dom() {
       });
     }
   }
-
 
   function clearPosition(ship = getSelectedShip()) {
     const { name } = getShipInfo(ship);
@@ -476,5 +505,11 @@ export default function Dom() {
     });
   }
 
-  return { renderBoard, renderDockedShips, dragAndDrop, shipButtons };
+  return {
+    renderBoard,
+    renderDockedShips,
+    dragAndDrop,
+    shipButtons,
+    confirmShips,
+  };
 }

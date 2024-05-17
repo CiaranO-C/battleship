@@ -1,9 +1,10 @@
-export function Ship(size) {
+export function Ship(size, axis) {
   const length = size;
   let hitCounter = 0;
   let sunk = false;
-  let vertical = false;
-  let horizontal = true;
+  //if axis passed in then ship vertical, otherwise horizontal
+  let vertical = axis ? true : false
+  let horizontal = axis ? false : true
 
   function getLength() {
     return length;

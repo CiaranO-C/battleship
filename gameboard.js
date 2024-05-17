@@ -29,8 +29,8 @@ export function Board() {
     return newBoard;
   }
 
-  function createShip(length){
-    const ship = Ship(length);
+  function createShip(length, axis){
+    const ship = Ship(length, axis);
     return ship;
   }
 

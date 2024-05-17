@@ -1,5 +1,5 @@
 import { game } from "./index.js";
-import shipsData from "./shipsData.js";
+import {shipsData} from "./shipsData.js";
 
 export default function Dom() {
   function renderBoard(container, board) {
@@ -59,7 +59,6 @@ export default function Dom() {
 
   function allShipsPlaced() {
     const ships = getAllShips();
-    console.log(ships)
     for (let i = 0; i < ships.length; i++) {
       const ship = ships[i];
       const parent = ship.parentElement;
@@ -71,7 +70,6 @@ export default function Dom() {
 
   function confirmShips() {
     if (allShipsPlaced()) {
-        console.log('all placed')
       const shipArray = [];
       const ships = getAllShips();
       ships.forEach((ship) => {

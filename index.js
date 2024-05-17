@@ -101,7 +101,6 @@ function Game() {
           newShip = playerOne.board.createShip(length);
         }
         playerOne.board.placeShip(newShip, i, j);
-        console.log('maybe placed')
       });
     }
     playerOne.board.printBoard();

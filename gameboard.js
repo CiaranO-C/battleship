@@ -1,17 +1,11 @@
 import { Ship } from "./ship.js";
+import { sumLengths } from './shipsData.js';
 
 export function Board() {
   const board = buildBoard();
   const missedAttacks = [];
   let totalHits = 0;
-  const shipLengths = {
-    carrier: 5,
-    battleship: 4,
-    destroyer: 3,
-    submarine: 3,
-    "patrol boat": 2,
-  };
-
+  
   function getBoard() {
     return board;
   }
@@ -41,7 +35,7 @@ export function Board() {
     return [i, j];
   }
 
-  function randomize() {
+  /*function randomize() {
     const lengths = Object.values(shipLengths);
 
     lengths.forEach((length) => {
@@ -64,7 +58,7 @@ export function Board() {
       }
     });
     printBoard();
-  }
+  }*/
 
   function validateCoords(i, j) {
     //if cell is empty and coordinates are positive values
@@ -113,7 +107,7 @@ export function Board() {
         board[i][j] = ship;
       });
     } else {
-      console.error(`invalid position -> ${i}, ${j}`);
+      console.log(`invalid position -> ${i}, ${j}`);
       return false;
     }
     return true;
@@ -146,11 +140,7 @@ export function Board() {
   }
 
   function shipsSunk() {
-    let sumOfLengths = 0;
-    const lengths = Object.values(shipLengths);
-    lengths.forEach((length) => {
-      sumOfLengths += length;
-    });
+    let sumOfLengths = sumLengths();
     if (totalHits === sumOfLengths) {
       return true;
     }

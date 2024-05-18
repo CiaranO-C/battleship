@@ -1,10 +1,15 @@
-export function Ship(size, axis) {
+export function Ship(typeOfShip, size, axis) {
+  const name = typeOfShip;
   const length = size;
   let hitCounter = 0;
   let sunk = false;
   //if axis passed in then ship vertical, otherwise horizontal
-  let vertical = axis ? true : false
-  let horizontal = axis ? false : true
+  let vertical = axis ? true : false;
+  let horizontal = axis ? false : true;
+
+  function getName() {
+    return name;
+  }
 
   function getLength() {
     return length;
@@ -15,7 +20,7 @@ export function Ship(size, axis) {
     horizontal = !horizontal;
   }
 
-  function isVertical(){
+  function isVertical() {
     return vertical;
   }
 
@@ -35,13 +40,13 @@ export function Ship(size, axis) {
   }
 
   return {
+    getName,
     getLength,
     hit,
     hitsTaken,
     isSunk,
     rotate,
     isVertical,
-
   };
 }
 

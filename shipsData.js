@@ -1,9 +1,9 @@
 const shipsData = [
-  ["carrier", 5],
-  ["battleship", 4],
-  ["destroyer", 3],
-  ["submarine", 3],
-  ["patrol", 2],
+  ["Carrier", 5],
+  ["Battleship", 4],
+  ["Destroyer", 3],
+  ["Submarine", 3],
+  ["Patrol", 2],
 ];
 
 function sumLengths() {
@@ -14,4 +14,12 @@ function sumLengths() {
   return sumOfLengths;
 }
 
-export {shipsData, sumLengths}
+function arrayOfLengths() {
+  const lengthArray = [];
+  shipsData.forEach((ship) => {
+    lengthArray.push(ship[1]);
+  });
+  return lengthArray;
+}
+
+export { shipsData, sumLengths, arrayOfLengths };

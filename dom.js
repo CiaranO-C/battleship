@@ -1,8 +1,8 @@
 import { game } from "./index.js";
-import {shipsData} from "./shipsData.js";
+import { shipsData } from "./shipsData.js";
 
 export default function Dom() {
-  function renderBoard(container, board) {
+  function renderPlayerBoard(container, board) {
     const length = board.length;
     for (let i = 0; i < length; i++) {
       for (let j = 0; j < length; j++) {
@@ -11,6 +11,20 @@ export default function Dom() {
         cell.setAttribute("data-j", j);
         const cellHasShip = board[i][j] !== "";
         cell.classList = cellHasShip ? "grid-cell ship" : "grid-cell";
+        container.appendChild(cell);
+      }
+    }
+  }
+
+  function renderComputerBoard() {
+    const container = document.querySelector("#playerTwo .board");
+    const length = 10;
+    for (let i = 0; i < length; i++) {
+      for (let j = 0; j < length; j++) {
+        const cell = document.createElement("div");
+        cell.setAttribute("data-i", i);
+        cell.setAttribute("data-j", j);
+        cell.classList.add("grid-cell");
         container.appendChild(cell);
       }
     }
@@ -81,7 +95,6 @@ export default function Dom() {
       });
       return shipArray;
     }
-
     return null;
   }
 
@@ -96,16 +109,6 @@ export default function Dom() {
 
     ///const playerOneScore = get
     //const playerTwoScore =
-  }
-
-  function shipButtons() {
-    const rotate = document.getElementById("rotateShip");
-    const random = document.getElementById("randomize");
-    const reset = document.getElementById("returnShips");
-
-    rotate.addEventListener("click", rotateShip);
-    random.addEventListener("click", randomize);
-    reset.addEventListener("click", dockShips);
   }
 
   function dockShips() {
@@ -164,6 +167,33 @@ export default function Dom() {
       : ship.setAttribute("data-axis", "horizontal");
   }
 
+  const restart = document.getElementById("restart");
+  const rotate = document.getElementById("rotateShip");
+  const random = document.getElementById("randomize");
+  const reset = document.getElementById("returnShips");
+
+  //function restartGame() {
+  //overwrite game object with new game, remove listeners and old elements
+  // }
+
+  function enableButtons() {
+    // restart.addEventListener('click', restartGame);
+    rotate.addEventListener("click", rotateShip);
+    random.addEventListener("click", randomize);
+    reset.addEventListener("click", dockShips);
+  }
+
+  function disableSetup() {
+    rotate.removeEventListener("click", rotateShip);
+    random.removeEventListener("click", randomize);
+    reset.removeEventListener("click", dockShips);
+    //clone to remove dragNdrop event listeners
+    const ships = getAllShips();
+    ships.forEach((ship) => {
+      ship.replaceWith(ship.cloneNode(true));
+    });
+  }
+
   function toggleSelectedShip(ship) {
     const oldShip = getSelectedShip();
     if (oldShip) oldShip.classList.toggle("selected-ship", false);
@@ -177,6 +207,7 @@ export default function Dom() {
 
   function createShip(name, length) {
     const ship = document.createElement("div");
+    name = name.toLowerCase();
     ship.classList.add("ship", `${name}`);
     ship.setAttribute("data-length", `${length}`);
     ship.setAttribute("data-axis", "horizontal");
@@ -187,8 +218,9 @@ export default function Dom() {
   function renderDockedShips() {
     shipsData.forEach((ship) => {
       const [name, length] = ship;
+      const lowerCaseName = name.toLowerCase();
       const shipDiv = createShip(name, length);
-      const dock = document.getElementById(`${name}Parent`);
+      const dock = document.getElementById(`${lowerCaseName}Parent`);
       dock.appendChild(shipDiv);
     });
   }
@@ -504,10 +536,12 @@ export default function Dom() {
   }
 
   return {
-    renderBoard,
+    renderPlayerBoard,
+    renderComputerBoard,
     renderDockedShips,
     dragAndDrop,
-    shipButtons,
+    enableButtons,
     confirmShips,
+    disableSetup,
   };
 }

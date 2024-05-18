@@ -2,7 +2,7 @@ import { Player, Computer } from "./player.js";
 import Dom from "./dom.js";
 
 let game;
-const playButton = document.getElementById("playButton");
+
 const computerName = document.getElementById("computer");
 const playerTwoName = document.getElementById("playerTwoName");
 const playerTwoSelection = document.querySelector(".player-two-select");
@@ -33,6 +33,7 @@ function gameSetup() {
   game.setup();
   renderPlayerNames();
   scrollToGame();
+  enablePlayButton();
 }
 
 function renderPlayerNames() {
@@ -50,13 +51,12 @@ function scrollToGame() {
   gameContainer.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-playButton.addEventListener(
-  "click",
-  () => {
+function enablePlayButton() {
+  const playButton = document.getElementById("playButton");
+  playButton.addEventListener("click", () => {
     game.run();
-  },
-  { once: true },
-);
+  });
+}
 
 function Game() {
   const { playerOne, playerTwo } = initalisePlayers();
@@ -66,26 +66,31 @@ function Game() {
   function setup() {
     initalisePlayers();
     disableInputs();
-    renderBoards();
+    renderBoards(); //bug here
     gui.renderDockedShips();
-    gui.shipButtons();
+    gui.enableButtons();
     gui.dragAndDrop();
   }
 
   function run() {
-    confirmAllShips();
-    //switchBoard();
-    //disablePlayerBoard
-    //enableOpponent board
-    //start round (check turn)
-    //player one turn
-    //enable click on opponent board
-    //click should get i, j and send to opponents recieve attack
-    //click should disable div from being clicked again
-    //if miss add to opponent missed array, return
-    //new .hit and .miss class css
-    //
-    //if hit, check opponent isSunk
+    if (confirmAllShips()) {
+      gui.disableSetup();
+      switchBoards();
+      playerOne.board.printBoard();
+      playerTwo.board.printBoard();
+      //switchBoard();
+      //disablePlayerBoard
+      //enableOpponent board
+      //start round (check turn)
+      //player one turn
+      //enable click on opponent board
+      //click should get i, j and send to opponents recieve attack
+      //click should disable div from being clicked again
+      //if miss add to opponent missed array, return
+      //new .hit and .miss class css
+      //
+      //if hit, check opponent isSunk
+    }
   }
 
   function confirmAllShips() {
@@ -101,51 +106,86 @@ function Game() {
         }
         playerOne.board.placeShip(newShip, i, j);
       });
+    } else {
+      console.log("false");
+      return false;
     }
     playerOne.board.printBoard();
+    return true;
   }
 
-  function switchTurn() {}
+  function switchTurn() {
+    turn = turn === playerOne ? playerTwo : playerOne;
+  }
 
-  function switchBoard() {
-    let playerBoard;
-    let opponentBoard;
+  function switchBoards() {
+    toggleOverlay();
+    toggleAttacks();
+  }
+
+  function getBoards() {
+    const boards = document.querySelectorAll(".board");
+    return boards;
+  }
+
+  function toggleOverlay() {
+    const boards = getBoards();
+    boards.forEach((board) => {
+      const overlay = board.firstElementChild;
+      overlay.classList.toggle("hidden");
+    });
+  }
+
+  function toggleAttacks() {
+    const [boardOne, boardTwo] = getBoards();
     if (turn === playerOne) {
-      playerBoard = document.querySelector("#playerOne .board");
-      opponentBoard = document.querySelector("#playerTwo .board");
+      enableAttacks(boardTwo);
+      disableAttacks(boardOne);
     } else {
-      playerBoard = document.querySelector("#playerTwo .board");
-      opponentBoard = document.querySelector("#playerOne .board");
+      enableAttacks(boardOne);
+      disableAttacks(boardTwo);
     }
-    dimBoard(playerBoard);
-    enableBoard(opponentBoard);
   }
 
-  function enableBoard(board) {
+  function enableAttacks(board) {
     board.addEventListener("click", sendAttack);
   }
 
-  function sendAttack(event) {
-    const targetCell = event.target;
-    const i = targetCell.getAttribute("data-i");
-    const j = targetCell.getAttribute("data-j");
+  function disableAttacks(board) {
+    board.removeEventListener("click", sendAttack);
+  }
 
-    const opponent = getOpponent();
-    const validAttack = opponent.board.recieveAttack(i, j);
-    if (validAttack) {
-      markCell(targetCell, opponent.board.getCell(i, j));
-      return true;
-    } else {
-      return false;
+  function validAttack(target) {
+    const classList = Array.from(target.classList);
+    if (classList.includes("hit") || classList.includes("miss")) return false;
+    return true;
+  }
+
+  function sendAttack(event) {
+    const validTarget = validAttack(event.target);
+    if (validTarget) {
+      const cell = event.target;
+      const i = cell.getAttribute("data-i");
+      const j = cell.getAttribute("data-j");
+
+      const opponent = getOpponent();
+      const validAttack = opponent.board.recieveAttack(i, j);
+      if (validAttack) {
+        console.log(validAttack);
+        markCell(cell, opponent.board.getCell(i, j));
+        opponent.board.printBoard();
+        return true;
+      } else {
+        return false;
+      }
     }
   }
 
-  function markCell(DOMcell, cell) {
-    console.log(cell);
-    if (cell === "O") {
-      DOMcell.classList = "miss";
+  function markCell(uiCell, arrayCell) {
+    if (arrayCell === "O") {
+      uiCell.classList.add("miss");
     } else {
-      DOMcell.classList = "hit";
+      uiCell.classList.add("hit");
     }
   }
 
@@ -154,11 +194,6 @@ function Game() {
       return playerTwo;
     }
     return playerOne;
-  }
-
-  function dimBoard(board) {
-    const overlay = board.firstElementChild;
-    overlay.classList.toggle("hidden", false);
   }
 
   function disableInputs() {
@@ -192,8 +227,8 @@ function Game() {
     overlays.forEach((overlay) => {
       overlay.classList.toggle("hidden");
     });
-    gui.renderBoard(boardOne, playerOne.board.getBoard());
-    gui.renderBoard(boardTwo, playerTwo.board.getBoard());
+    gui.renderPlayerBoard(boardOne, playerOne.board.getBoard());
+    gui.renderComputerBoard();
   }
 
   function toggleReadOnly(input) {

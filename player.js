@@ -36,16 +36,18 @@ function Computer() {
   const { board, score, getScore, getName, setName, incrementScore } = player;
 
   setName("Computer");
+  board.randomize();
 
-  function playTurn() {
+  function getTargetCoords() {
     const target = board.getRandomIndex();
+    return target;
   }
 
   return {
     getName,
     getScore,
     incrementScore,
-    playTurn,
+    getTargetCoords,
     board,
   };
 }

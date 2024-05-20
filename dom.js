@@ -171,6 +171,7 @@ export default function Dom() {
   const rotate = document.getElementById("rotateShip");
   const random = document.getElementById("randomize");
   const reset = document.getElementById("returnShips");
+  const playButtonContainer = document.querySelector('.start-game-container');
 
   //function restartGame() {
   //overwrite game object with new game, remove listeners and old elements
@@ -187,6 +188,7 @@ export default function Dom() {
     rotate.removeEventListener("click", rotateShip);
     random.removeEventListener("click", randomize);
     reset.removeEventListener("click", dockShips);
+    playButtonContainer.classList.add('hidden');
     //clone to remove dragNdrop event listeners
     const ships = getAllShips();
     ships.forEach((ship) => {
@@ -536,6 +538,7 @@ export default function Dom() {
   }
 
   return {
+    getIndexAttributes,
     renderPlayerBoard,
     renderComputerBoard,
     renderDockedShips,

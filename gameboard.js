@@ -77,7 +77,7 @@ export function Board() {
     if (i > 9 || i < 0 || j > 9 || j < 0) return false;
 
     const cell = board[i][j];
-    if (!cell.getHit()) {
+    if (!cell.isHit()) {
       return true;
     } else {
       return false;
@@ -109,35 +109,27 @@ export function Board() {
     //return something if initial cell invalid
   }
 
-  
-
   function printBoard() {
     console.table(board);
   }
 
   function recieveAttack(i, j) {
-    const target = getCell(i, j);
-    if (validateAttack(target)) {
-      if (target === "") {
-        missedAttacks.push([i, j]);
-        board[i][j] = "O";
-        printBoard();
-      } else {
-        target.hit();
+    const targetCell = getCell(i, j);
+    if (validateAttack(targetCell)) {
+      if (targetCell.hasShip()) {
+        const ship = targetCell.getShip();
+        ship.hit();
         totalHits++;
-        board[i][j] = "X";
-        printBoard();
-        if (target.isSunk()) {
-        }
-        return target;
       }
+      targetCell.setHit();
+
       return true;
     }
     return false;
   }
 
   function validateAttack(targetCell) {
-    const beenHit = targetCell.getHit();
+    const beenHit = targetCell.isHit();
     if (beenHit) return false;
     return true;
   }

@@ -6,6 +6,10 @@ export default function Cell() {
     ship = shipObj;
   }
 
+  function getShip() {
+    return ship;
+  }
+
   function setHit() {
     hit = true;
   }
@@ -30,6 +34,7 @@ export default function Cell() {
 
   return {
     setShip,
+    getShip,
     setHit,
     hasShip,
     shipName,

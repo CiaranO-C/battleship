@@ -61,12 +61,12 @@ function enablePlayButton() {
 function Game() {
   const { playerOne, playerTwo } = initalisePlayers();
   const gui = Dom();
-  let turn = playerOne;
+  let currentPlayer = playerOne;
 
   function setup() {
     initalisePlayers();
     disableInputs();
-    renderBoards(); //bug here
+    renderBoards();
     gui.renderDockedShips();
     gui.enableButtons();
     gui.dragAndDrop();
@@ -75,9 +75,7 @@ function Game() {
   function run() {
     if (confirmAllShips()) {
       gui.disableSetup();
-      switchBoards();
-      playerOne.board.printBoard();
-      playerTwo.board.printBoard();
+      playTurn();
       //switchBoard();
       //disablePlayerBoard
       //enableOpponent board
@@ -93,6 +91,23 @@ function Game() {
     }
   }
 
+  function playTurn(event) {
+    toggleOverlay();
+    const player = currentPlayer;
+    const opponent = getOpponent();
+    let turnComplete = false;
+
+    disableAttacks(getBoard(player));
+    enableAttacks(getBoard(opponent));
+  }
+
+  function endTurn() {
+    setTimeout(() => {
+      switchTurn();
+      playTurn();
+    }, 1500);
+  }
+
   function confirmAllShips() {
     const validShips = gui.confirmShips();
     if (validShips) {
@@ -106,16 +121,13 @@ function Game() {
         }
         playerOne.board.placeShip(newShip, i, j);
       });
-    } else {
-      console.log("false");
-      return false;
+      return true;
     }
-    playerOne.board.printBoard();
-    return true;
+    return false;
   }
 
   function switchTurn() {
-    turn = turn === playerOne ? playerTwo : playerOne;
+    currentPlayer = currentPlayer === playerOne ? playerTwo : playerOne;
   }
 
   function switchBoards() {
@@ -136,48 +148,42 @@ function Game() {
     });
   }
 
-  function toggleAttacks() {
-    const [boardOne, boardTwo] = getBoards();
-    if (turn === playerOne) {
-      enableAttacks(boardTwo);
-      disableAttacks(boardOne);
-    } else {
-      enableAttacks(boardOne);
-      disableAttacks(boardTwo);
-    }
-  }
-
   function enableAttacks(board) {
-    board.addEventListener("click", sendAttack);
+    board.addEventListener("click", handleAttack);
   }
 
   function disableAttacks(board) {
-    board.removeEventListener("click", sendAttack);
+    board.removeEventListener("click", handleAttack);
+  }
+
+  function handleAttack(event) {
+    const target = event.target;
+    if (validAttack(target)) {
+      const attackSuccessful = sendAttack(target);
+      if (attackSuccessful) endTurn();
+    }
   }
 
   function validAttack(target) {
-    const classList = Array.from(target.classList);
-    if (classList.includes("hit") || classList.includes("miss")) return false;
-    return true;
+    if (target.classList.contains("grid-cell")) {
+      const classes = Array.from(target.classList);
+      if (classes.includes("hit") || classes.includes("miss")) return false;
+      return true;
+    }
+    return false;
   }
 
-  function sendAttack(event) {
-    const validTarget = validAttack(event.target);
-    if (validTarget) {
-      const cell = event.target;
-      const i = cell.getAttribute("data-i");
-      const j = cell.getAttribute("data-j");
+  function sendAttack(cell) {
+    const [i, j] = gui.getIndexAttributes(cell);
+    const opponent = getOpponent();
+    const validAttack = opponent.board.recieveAttack(i, j);
 
-      const opponent = getOpponent();
-      const validAttack = opponent.board.recieveAttack(i, j);
-      if (validAttack) {
-        console.log(validAttack);
-        markCell(cell, opponent.board.getCell(i, j));
-        opponent.board.printBoard();
-        return true;
-      } else {
-        return false;
-      }
+    if (validAttack) {
+      markCell(cell, opponent.board.getCell(i, j));
+      opponent.board.printBoard();
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -189,8 +195,17 @@ function Game() {
     }
   }
 
+  function getBoard(player) {
+    const boards = document.querySelectorAll(".board");
+    if (player === playerOne) {
+      return boards[0];
+    } else {
+      return boards[1];
+    }
+  }
+
   function getOpponent() {
-    if (turn === playerOne) {
+    if (currentPlayer === playerOne) {
       return playerTwo;
     }
     return playerOne;

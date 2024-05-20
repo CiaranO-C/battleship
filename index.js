@@ -76,49 +76,57 @@ function Game() {
     if (confirmAllShips()) {
       gui.disableSetup();
       playTurn();
-      //switchBoard();
-      //disablePlayerBoard
-      //enableOpponent board
-      //start round (check turn)
-      //player one turn
-      //enable click on opponent board
-      //click should get i, j and send to opponents recieve attack
-      //click should disable div from being clicked again
-      //if miss add to opponent missed array, return
-      //new .hit and .miss class css
-      //
-      //if hit, check opponent isSunk
     }
   }
 
-  function computerTurn(computer) {
+  function computerTurn() {
+    const computer = currentPlayer;
     let targetCell;
     let targetValid = false;
-    while(!targetValid){
-    const [i, j] = computer.getTarget();
-    targetCell = gui.getCell(i, j);
-    targetValid = validAttack(targetCell);
+    while (!targetValid) {
+      const [i, j] = computer.getTarget();
+      targetCell = gui.getCell(i, j);
+      targetValid = validAttack(targetCell);
     }
     targetCell.click();
   }
 
   function playTurn() {
     toggleOverlay();
-    const player = currentPlayer;
     const opponent = getOpponent();
-    disableAttacks(getBoard(player));
+    disableAttacks(getBoard(currentPlayer));
     enableAttacks(getBoard(opponent));
 
-    if (player.isComputer()) {
-      computerTurn(player);
+    if (currentPlayer.isComputer()) {
+      computerTurn();
     }
+  }
+
+  function checkForWinner() {
+    const opponent = getOpponent();
+    if (opponent.board.shipsSunk()) {
+        currentPlayer.incrementScore();
+      return true;
+    }
+    return false;
+  }
+
+  function endGame(){
+    disableAttacks(getBoard(getOpponent()));
+    console.log(currentPlayer.getScore());
+    console.log(`${currentPlayer.getName()} wins!`);
   }
 
   function endTurn() {
     setTimeout(() => {
-      switchTurn();
-      playTurn();
-    }, 1500);
+      const winner = checkForWinner();
+      if (winner) {
+        endGame();
+      } else {
+        switchTurn();
+        playTurn();
+      }
+    }, 100);
   }
 
   function confirmAllShips() {
@@ -185,7 +193,7 @@ function Game() {
 
     if (validAttack) {
       markCell(cell, opponent.board.getCell(i, j));
-      disableAttacks(getBoard(getOpponent()))
+      disableAttacks(getBoard(getOpponent()));
       return true;
     } else {
       return false;
@@ -249,14 +257,6 @@ function Game() {
     });
     gui.renderPlayerBoard(boardOne, playerOne.board.getBoard());
     gui.renderComputerBoard();
-  }
-
-  function toggleReadOnly(input) {
-    if (input.readOnly) {
-      input.readOnly = false;
-    } else {
-      input.readOnly = true;
-    }
   }
 
   return { playerOne, playerTwo, run, setup };

@@ -163,6 +163,3 @@ export function Board() {
 
 let board = Board();
 board.buildBoard();
-console.log("board built");
-//board.randomize();
-board.printBoard();

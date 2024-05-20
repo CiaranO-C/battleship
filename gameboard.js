@@ -47,28 +47,29 @@ export function Board() {
       const [name, length] = ship;
       const shipObj = Ship(name, length);
 
-      do {
+      while (!shipPlaced) {
         [i, j] = getRandomIndex();
         shipPlaced = placeShip(shipObj, i, j);
         if (!shipPlaced) {
           shipObj.rotate();
           shipPlaced = placeShip(shipObj, i, j);
         }
-      } while (!shipPlaced);
+      }
     });
-    printBoard();
   }
 
   function placeShip(ship, i, j) {
-    const validCells = validatePosition(ship, i, j);
-    if (validCells) {
+    console.log(ship, i , j)
+    const validCells = validatePosition(ship, i, j); //this is returning an empty array
+    console.log(validCells)
+    if (validCells && validCells.length !== 0) {
       validCells.forEach((coordinates) => {
         const [i, j] = coordinates;
         board[i][j].setShip(ship);
       });
+      console.log(validCells)
       return true;
     }
-    console.log(`invalid position -> ${i}, ${j}`);
     return false;
   }
 
@@ -89,7 +90,8 @@ export function Board() {
       let shipEnd;
       const shipLength = ship.getLength();
       let validCells = [];
-
+      console.log(ship.isVertical())
+        
       if (ship.isVertical()) {
         shipEnd = i + shipLength;
         for (let n = i; n < shipEnd; n++) {
@@ -97,6 +99,7 @@ export function Board() {
           validCells.push([n, j]);
         }
       } else {
+        console.log('hello')
         shipEnd = j + shipLength;
         for (let n = j; n < shipEnd; n++) {
           const currentCell = board[i][n];
@@ -106,7 +109,7 @@ export function Board() {
       }
       return validCells;
     }
-    //return something if initial cell invalid
+    console.log('initial cell invalid')
   }
 
   function printBoard() {

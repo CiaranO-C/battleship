@@ -89,8 +89,8 @@ export default function Dom() {
       ships.forEach((ship) => {
         const parentCell = ship.parentElement;
         const [i, j] = getIndexAttributes(parentCell);
-        const { length, axis } = getShipInfo(ship);
-        const shipPackage = { i, j, length, axis };
+        const { name, length, axis } = getShipInfo(ship);
+        const shipPackage = { i, j, name, length, axis };
         shipArray.push(shipPackage);
       });
       return shipArray;
@@ -98,9 +98,11 @@ export default function Dom() {
     return null;
   }
 
-  function getPlayerScore(player) {
-    const score = player.getScore();
-    return score;
+  function addPoint(player){
+    const container = document.getElementById(`${player}Points`)
+    const point = document.createElement('div');
+    point.classList.add('point');
+    container.appendChild(point);
   }
 
   function updateScores() {
@@ -538,6 +540,7 @@ export default function Dom() {
   }
 
   return {
+    addPoint,
     getIndexAttributes,
     renderPlayerBoard,
     renderComputerBoard,

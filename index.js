@@ -64,7 +64,6 @@ function Game() {
   let currentPlayer = playerOne;
 
   function setup() {
-    initalisePlayers();
     disableInputs();
     renderBoards();
     gui.renderDockedShips();
@@ -102,16 +101,22 @@ function Game() {
     }
   }
 
+  function updateScores() {
+    currentPlayer.incrementScore();
+    const player = currentPlayer === playerOne ? "playerOne" : "playerTwo";
+    gui.addPoint(player);
+  }
+
   function checkForWinner() {
     const opponent = getOpponent();
     if (opponent.board.shipsSunk()) {
-        currentPlayer.incrementScore();
+      updateScores();
       return true;
     }
     return false;
   }
 
-  function endGame(){
+  function endGame() {
     disableAttacks(getBoard(getOpponent()));
     console.log(currentPlayer.getScore());
     console.log(`${currentPlayer.getName()} wins!`);
@@ -134,11 +139,11 @@ function Game() {
     if (validShips) {
       validShips.forEach((ship) => {
         let newShip;
-        const { i, j, length, axis } = ship;
+        const { i, j, name, length, axis } = ship;
         if (axis === "vertical") {
-          newShip = playerOne.board.createShip(length, axis);
+          newShip = playerOne.board.createShip(name, length, axis);
         } else {
-          newShip = playerOne.board.createShip(length);
+          newShip = playerOne.board.createShip(name, length);
         }
         playerOne.board.placeShip(newShip, i, j);
       });
@@ -149,8 +154,6 @@ function Game() {
 
   function switchTurn() {
     currentPlayer = currentPlayer === playerOne ? playerTwo : playerOne;
-    console.log(playerOne.isComputer());
-    console.log(playerTwo.isComputer());
   }
 
   function toggleOverlay() {
@@ -192,6 +195,7 @@ function Game() {
     const validAttack = opponent.board.recieveAttack(i, j);
 
     if (validAttack) {
+        console.log(opponent.board.getCell(i, j).shipName())
       markCell(cell, opponent.board.getCell(i, j));
       disableAttacks(getBoard(getOpponent()));
       return true;

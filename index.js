@@ -181,11 +181,11 @@ function Game() {
     }
   }
 
-  function markCell(uiCell, arrayCell) {
-    if (arrayCell === "O") {
-      uiCell.classList.add("miss");
-    } else {
+  function markCell(uiCell, cell) {
+    if (cell.hasShip()) {
       uiCell.classList.add("hit");
+    } else {
+      uiCell.classList.add("miss");
     }
   }
 

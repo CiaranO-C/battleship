@@ -1,11 +1,12 @@
 import { Ship } from "./ship.js";
-import { sumLengths } from './shipsData.js';
+import { sumLengths, arrayOfLengths, shipsData } from "./shipsData.js";
+import Cell from "./gridCell.js";
 
 export function Board() {
   const board = buildBoard();
   const missedAttacks = [];
   let totalHits = 0;
-  
+
   function getBoard() {
     return board;
   }
@@ -16,15 +17,16 @@ export function Board() {
     for (let i = 0; i < boardWidth; i++) {
       const row = [];
       for (let j = 0; j < boardWidth; j++) {
-        row.push("");
+        const cell = Cell();
+        row.push(cell);
       }
       newBoard.push(row);
     }
     return newBoard;
   }
 
-  function createShip(length, axis){
-    const ship = Ship(length, axis);
+  function createShip(name, length, axis) {
+    const ship = Ship(name, length, axis);
     return ship;
   }
 
@@ -35,37 +37,47 @@ export function Board() {
     return [i, j];
   }
 
-  /*function randomize() {
-    const lengths = Object.values(shipLengths);
+  function randomize() {
+    const ships = shipsData;
 
-    lengths.forEach((length) => {
-      let [i, j] = getRandomIndex();
-      const newShip = Ship(length);
-      let shipPlaced = placeShip(newShip, i, j);
-      //if ship cannot be placed try again with new coordinates
-      if (!shipPlaced) {
-        newShip.rotate();
-        shipPlaced = placeShip(newShip, i, j);
-      }
+    ships.forEach((ship) => {
+      let i;
+      let j;
+      let shipPlaced = false;
+      const [name, length] = ship;
+      const shipObj = Ship(name, length);
 
-      while (!shipPlaced) {
+      do {
         [i, j] = getRandomIndex();
-        shipPlaced = placeShip(newShip, i, j);
+        shipPlaced = placeShip(shipObj, i, j);
         if (!shipPlaced) {
-          newShip.rotate();
-          shipPlaced = placeShip(newShip, i, j);
+          shipObj.rotate();
+          shipPlaced = placeShip(shipObj, i, j);
         }
-      }
+      } while (!shipPlaced);
     });
     printBoard();
-  }*/
+  }
+
+  function placeShip(ship, i, j) {
+    const validCells = validatePosition(ship, i, j);
+    if (validCells) {
+      validCells.forEach((coordinates) => {
+        const [i, j] = coordinates;
+        board[i][j].setShip(ship);
+      });
+      return true;
+    }
+    console.log(`invalid position -> ${i}, ${j}`);
+    return false;
+  }
 
   function validateCoords(i, j) {
     //if cell is empty and coordinates are positive values
     if (i > 9 || i < 0 || j > 9 || j < 0) return false;
 
     const cell = board[i][j];
-    if (cell === "") {
+    if (!cell.getHit()) {
       return true;
     } else {
       return false;
@@ -81,7 +93,6 @@ export function Board() {
       if (ship.isVertical()) {
         shipEnd = i + shipLength;
         for (let n = i; n < shipEnd; n++) {
-          console.log(`n = ${n} // j = ${j}`);
           if (!validateCoords(n, j)) return false;
           validCells.push([n, j]);
         }
@@ -98,20 +109,8 @@ export function Board() {
     //return something if initial cell invalid
   }
 
-  function placeShip(ship, i, j) {
-    const validCells = validatePosition(ship, i, j);
-    if (validCells) {
-      validCells.forEach((coordinates) => {
-        const i = coordinates[0];
-        const j = coordinates[1];
-        board[i][j] = ship;
-      });
-    } else {
-      console.log(`invalid position -> ${i}, ${j}`);
-      return false;
-    }
-    return true;
-  }
+  
+
   function printBoard() {
     console.table(board);
   }
@@ -128,14 +127,18 @@ export function Board() {
         totalHits++;
         board[i][j] = "X";
         printBoard();
+        if (target.isSunk()) {
+        }
+        return target;
       }
       return true;
     }
     return false;
   }
 
-  function validateAttack(target) {
-    if (target === "O" || target === "X") return false;
+  function validateAttack(targetCell) {
+    const beenHit = targetCell.getHit();
+    if (beenHit) return false;
     return true;
   }
 
@@ -162,7 +165,7 @@ export function Board() {
     validateCoords,
     getRandomIndex,
     validatePosition,
-    createShip
+    createShip,
   };
 }
 

@@ -9,7 +9,7 @@ export default function Dom() {
         const cell = document.createElement("div");
         cell.setAttribute("data-i", i);
         cell.setAttribute("data-j", j);
-        const cellHasShip = board[i][j] !== "";
+        const cellHasShip = board[i][j].hasShip();
         cell.classList = cellHasShip ? "grid-cell ship" : "grid-cell";
         container.appendChild(cell);
       }

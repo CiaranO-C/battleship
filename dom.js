@@ -546,5 +546,6 @@ export default function Dom() {
     enableButtons,
     confirmShips,
     disableSetup,
+    getCell,
   };
 }

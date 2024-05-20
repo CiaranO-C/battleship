@@ -91,14 +91,27 @@ function Game() {
     }
   }
 
-  function playTurn(event) {
+  function computerTurn(computer) {
+    let targetCell;
+    let targetValid = false;
+    while(!targetValid){
+    const [i, j] = computer.getTarget();
+    targetCell = gui.getCell(i, j);
+    targetValid = validAttack(targetCell);
+    }
+    targetCell.click();
+  }
+
+  function playTurn() {
     toggleOverlay();
     const player = currentPlayer;
     const opponent = getOpponent();
-    let turnComplete = false;
-
     disableAttacks(getBoard(player));
     enableAttacks(getBoard(opponent));
+
+    if (player.isComputer()) {
+      computerTurn(player);
+    }
   }
 
   function endTurn() {
@@ -128,20 +141,12 @@ function Game() {
 
   function switchTurn() {
     currentPlayer = currentPlayer === playerOne ? playerTwo : playerOne;
-  }
-
-  function switchBoards() {
-    toggleOverlay();
-    toggleAttacks();
-  }
-
-  function getBoards() {
-    const boards = document.querySelectorAll(".board");
-    return boards;
+    console.log(playerOne.isComputer());
+    console.log(playerTwo.isComputer());
   }
 
   function toggleOverlay() {
-    const boards = getBoards();
+    const boards = document.querySelectorAll(".board");
     boards.forEach((board) => {
       const overlay = board.firstElementChild;
       overlay.classList.toggle("hidden");
@@ -180,7 +185,7 @@ function Game() {
 
     if (validAttack) {
       markCell(cell, opponent.board.getCell(i, j));
-      opponent.board.printBoard();
+      disableAttacks(getBoard(getOpponent()))
       return true;
     } else {
       return false;

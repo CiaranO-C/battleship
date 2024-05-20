@@ -1,9 +1,10 @@
 import { Board } from "./gameboard.js";
 
-function Player() {
+function Player(computerPlayer = false) {
   let name = null;
   const board = Board();
   let score = 0;
+  const computer = computerPlayer;
 
   function getName() {
     return name;
@@ -22,23 +23,38 @@ function Player() {
     name = newName;
   }
 
+  function isComputer() {
+    if (computer) return true;
+    return false;
+  }
+
   return {
     getName,
     setName,
     getScore,
     incrementScore,
+    isComputer,
     board,
   };
 }
 
 function Computer() {
-  const player = Player();
-  const { board, score, getScore, getName, setName, incrementScore } = player;
+  const player = Player(true);
+  const {
+    board,
+    score,
+    getScore,
+    getName,
+    setName,
+    incrementScore,
+    isComputer,
+  } = player;
+  
 
   setName("Computer");
   board.randomize();
 
-  function getTargetCoords() {
+  function getTarget() {
     const target = board.getRandomIndex();
     return target;
   }
@@ -47,7 +63,8 @@ function Computer() {
     getName,
     getScore,
     incrementScore,
-    getTargetCoords,
+    getTarget,
+    isComputer,
     board,
   };
 }

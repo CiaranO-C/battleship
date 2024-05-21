@@ -49,14 +49,27 @@ function Computer() {
     incrementScore,
     isComputer,
   } = player;
-  
+
+  const previousTargets = [];
 
   setName("Computer");
   board.randomize();
 
   function getTarget() {
     const target = board.getRandomIndex();
+    previousTargets.push(target);
     return target;
+  }
+
+  function getAdjacentTargets() {
+    const previous = previousTargets.pop();
+    const [i, j] = previous;
+    const above = [i + 1, j];
+    const below = [i - 1, j];
+    const left = [i, j - 1];
+    const right = [i, j + 1];
+    const targets = [above, below, left, right];
+    return targets;
   }
 
   return {

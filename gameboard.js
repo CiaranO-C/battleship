@@ -78,10 +78,10 @@ export function Board() {
     if (i > 9 || i < 0 || j > 9 || j < 0) return false;
 
     const cell = board[i][j];
-    if (!cell.isHit()) {
-      return true;
-    } else {
+    if (cell.isHit() || cell.hasShip()) {
       return false;
+    } else {
+      return true;
     }
   }
 
@@ -99,7 +99,6 @@ export function Board() {
           validCells.push([n, j]);
         }
       } else {
-        console.log('hello')
         shipEnd = j + shipLength;
         for (let n = j; n < shipEnd; n++) {
           const currentCell = board[i][n];

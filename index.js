@@ -116,8 +116,23 @@ function Game() {
     return false;
   }
 
+  function declareWinner() {
+    const name = currentPlayer.getName();
+
+    const overlays = document.querySelectorAll(".overlay");
+    overlays.forEach((overlay) => {
+      const winner = document.createElement("h2");
+      winner.textContent = `${name} wins!`;
+      overlay.appendChild(winner);
+    });
+  }
+
   function endGame() {
     disableAttacks(getBoard(getOpponent()));
+    hideBoards();
+    declareWinner();
+    /*const again = playAgain();
+     */
     console.log(currentPlayer.getScore());
     console.log(`${currentPlayer.getName()} wins!`);
   }
@@ -154,6 +169,13 @@ function Game() {
 
   function switchTurn() {
     currentPlayer = currentPlayer === playerOne ? playerTwo : playerOne;
+  }
+
+  function hideBoards() {
+    const overlays = document.querySelectorAll(".overlay");
+    overlays.forEach((overlay) => {
+      overlay.classList.remove("hidden");
+    });
   }
 
   function toggleOverlay() {
@@ -195,7 +217,7 @@ function Game() {
     const validAttack = opponent.board.recieveAttack(i, j);
 
     if (validAttack) {
-        console.log(opponent.board.getCell(i, j).shipName())
+      console.log(opponent.board.getCell(i, j).shipName());
       markCell(cell, opponent.board.getCell(i, j));
       disableAttacks(getBoard(getOpponent()));
       return true;

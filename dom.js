@@ -98,19 +98,11 @@ export default function Dom() {
     return null;
   }
 
-  function addPoint(player){
-    const container = document.getElementById(`${player}Points`)
-    const point = document.createElement('div');
-    point.classList.add('point');
+  function addPoint(player) {
+    const container = document.getElementById(`${player}Points`);
+    const point = document.createElement("div");
+    point.classList.add("point");
     container.appendChild(point);
-  }
-
-  function updateScores() {
-    const playerOne = document.getElementById("playerOnePoints");
-    const playerTwo = document.getElementById("playerTwoPoints");
-
-    ///const playerOneScore = get
-    //const playerTwoScore =
   }
 
   function dockShips() {
@@ -173,7 +165,7 @@ export default function Dom() {
   const rotate = document.getElementById("rotateShip");
   const random = document.getElementById("randomize");
   const reset = document.getElementById("returnShips");
-  const playButtonContainer = document.querySelector('.start-game-container');
+  const playButtonContainer = document.querySelector(".start-game-container");
 
   //function restartGame() {
   //overwrite game object with new game, remove listeners and old elements
@@ -190,10 +182,13 @@ export default function Dom() {
     rotate.removeEventListener("click", rotateShip);
     random.removeEventListener("click", randomize);
     reset.removeEventListener("click", dockShips);
-    playButtonContainer.classList.add('hidden');
+    playButtonContainer.classList.add("hidden");
+    const selected = getSelectedShip();
+    selected.classList.remove("selected-ship");
     //clone to remove dragNdrop event listeners
     const ships = getAllShips();
     ships.forEach((ship) => {
+      ship.style.zIndex = "-1";
       ship.replaceWith(ship.cloneNode(true));
     });
   }

@@ -1,5 +1,6 @@
-import { Player, Computer } from "./player.js";
+import { Player } from "./player.js";
 import Dom from "./dom.js";
+import { Computer } from "./computer.js";
 
 let game;
 
@@ -80,14 +81,21 @@ function Game() {
 
   function computerTurn() {
     const computer = currentPlayer;
-    let targetCell;
-    let targetValid = false;
-    while (!targetValid) {
-      const [i, j] = computer.getTarget();
-      targetCell = gui.getCell(i, j);
-      targetValid = validAttack(targetCell);
+
+    computer.queueTarget();
+
+    const [i, j] = computer.getTargetCoordinates();
+
+    const targetCell = gui.getCell(i, j);
+
+    const cellObj = getOpponent().board.getCell(i, j);
+
+    if (cellObj.hasShip()) {
+      currentPlayer.saveTarget([i, j]);
     }
+
     targetCell.click();
+    console.log(getOpponent().board.getCell(i, j).isHit());
   }
 
   function playTurn() {
@@ -211,13 +219,23 @@ function Game() {
     return false;
   }
 
+  function validateOpponentBoard(target) {
+    let isValid = false;
+    const opponent = getOpponent();
+    const [i, j] = target;
+    const cell = opponent.board.getCell(i, j);
+    if (cell) {
+      isValid = opponent.board.validateAttack(cell);
+    }
+    return isValid;
+  }
+
   function sendAttack(cell) {
     const [i, j] = gui.getIndexAttributes(cell);
     const opponent = getOpponent();
     const validAttack = opponent.board.recieveAttack(i, j);
 
     if (validAttack) {
-      console.log(opponent.board.getCell(i, j).shipName());
       markCell(cell, opponent.board.getCell(i, j));
       disableAttacks(getBoard(getOpponent()));
       return true;
@@ -285,7 +303,7 @@ function Game() {
     gui.renderComputerBoard();
   }
 
-  return { playerOne, playerTwo, run, setup };
+  return { playerOne, playerTwo, run, setup, validateOpponentBoard };
 }
 
 export { game };

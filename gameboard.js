@@ -59,15 +59,15 @@ export function Board() {
   }
 
   function placeShip(ship, i, j) {
-    console.log(ship, i , j)
-    const validCells = validatePosition(ship, i, j); //this is returning an empty array
-    console.log(validCells)
+    
+    const validCells = validatePosition(ship, i, j);
+
     if (validCells && validCells.length !== 0) {
       validCells.forEach((coordinates) => {
         const [i, j] = coordinates;
         board[i][j].setShip(ship);
       });
-      console.log(validCells)
+
       return true;
     }
     return false;
@@ -90,8 +90,8 @@ export function Board() {
       let shipEnd;
       const shipLength = ship.getLength();
       let validCells = [];
-      console.log(ship.isVertical())
-        
+      
+
       if (ship.isVertical()) {
         shipEnd = i + shipLength;
         for (let n = i; n < shipEnd; n++) {
@@ -108,7 +108,7 @@ export function Board() {
       }
       return validCells;
     }
-    console.log('initial cell invalid')
+    console.log("initial cell invalid");
   }
 
   function printBoard() {
@@ -124,7 +124,6 @@ export function Board() {
         totalHits++;
       }
       targetCell.setHit();
-
       return true;
     }
     return false;
@@ -155,6 +154,7 @@ export function Board() {
     randomize,
     getCell,
     recieveAttack,
+    validateAttack,
     shipsSunk,
     validateCoords,
     getRandomIndex,

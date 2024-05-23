@@ -108,7 +108,6 @@ export function Board() {
       }
       return validCells;
     }
-    console.log("initial cell invalid");
   }
 
   function printBoard() {

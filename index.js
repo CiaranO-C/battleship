@@ -83,19 +83,20 @@ function Game() {
     const computer = currentPlayer;
 
     computer.queueTarget();
-
     const [i, j] = computer.getTargetCoordinates();
 
     const targetCell = gui.getCell(i, j);
-
     const cellObj = getOpponent().board.getCell(i, j);
 
     if (cellObj.hasShip()) {
       currentPlayer.saveTarget([i, j]);
     }
-
     targetCell.click();
-    console.log(getOpponent().board.getCell(i, j).isHit());
+
+    if (cellObj.hasShip()) {
+      const shipObj = cellObj.getShip();
+      if (shipObj.isSunk()) computer.enemyShipSunk(shipObj.getLength());
+    }
   }
 
   function playTurn() {
@@ -154,7 +155,7 @@ function Game() {
         switchTurn();
         playTurn();
       }
-    }, 1000);
+    }, 250);
   }
 
   function confirmAllShips() {

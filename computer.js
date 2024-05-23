@@ -1,5 +1,6 @@
 import { Player } from "./player.js";
 import { game } from "./index.js";
+import { arrayOfLengths } from "./shipsData.js";
 
 export function Computer() {
   const player = Player(true);
@@ -18,10 +19,30 @@ export function Computer() {
 
   const previousHits = [];
   const targetQueue = [];
+  let longestRemainingShip = 5;
+  let shipLengths = arrayOfLengths();
 
-  function getPreviousHits() {
+  function updateLongestShip() {
+    let longest = 0;
+    shipLengths.forEach((length) => {
+      if (length > longest) {
+        longest = length;
+      }
+    });
+    longestRemainingShip = longest;
+  }
+
+  function enemyShipSunk(sunkShipLength) {
+    console.log(`longest -> ${longestRemainingShip}`);
+    const i = shipLengths.indexOf(sunkShipLength);
+    shipLengths.splice(i, 1);
+    updateLongestShip();
+    console.log(`longest -> ${longestRemainingShip}`);
+  }
+
+  function getPreviousHit() {
     if (previousHits.length > 0) {
-      return previousHits;
+      return previousHits[previousHits.length - 1];
     }
     return false;
   }
@@ -37,6 +58,8 @@ export function Computer() {
       target = board.getRandomIndex();
       validTarget = game.validateOpponentBoard(target);
     }
+    if (previousHits.length > 0) resetHits();
+    console.log("random target");
     return target;
   }
 
@@ -47,7 +70,7 @@ export function Computer() {
     const left = [i, j - 1];
     const right = [i, j + 1];
     const adjacents = validAdjacents([above, below, left, right]);
-    console.log(adjacents);
+
     if (adjacents.length === 0) return false;
     return adjacents;
   }
@@ -60,7 +83,7 @@ export function Computer() {
         validCoords.push(coord);
       }
     });
-    console.log(validCoords);
+
     return validCoords;
   }
 
@@ -78,7 +101,7 @@ export function Computer() {
     const validTarget = game.validateOpponentBoard(next);
 
     if (!validTarget) return false;
-
+    console.log("next target");
     return next;
   }
 
@@ -101,7 +124,18 @@ export function Computer() {
     const validTarget = game.validateOpponentBoard(opposite);
 
     if (!validTarget) return false;
+    console.log("opposite target");
+    //if opposite is a miss this forces random targeting to resume on following turn
+    overWriteHits();
     return opposite;
+  }
+
+  function overWriteHits() {
+    const start = previousHits[0];
+    for (let i = 0; i < previousHits.length; i++) {
+      previousHits[i] = start;
+    }
+    console.log(previousHits);
   }
 
   function enqueue(target) {
@@ -113,35 +147,30 @@ export function Computer() {
     return targetCoords;
   }
 
+  function getAdjacentTarget() {
+    console.log("adjacent target");
+    const adjacents = getAdjacents();
+    const adjIndex = Math.floor(Math.random() * adjacents.length);
+    const target = adjacents[adjIndex];
+    return target;
+  }
+
   function queueTarget() {
-    const shipFound = previousHits.length > 0;
-    const queueEmpty = targetQueue.length === 0;
+    console.log(previousHits);
+    const hits = previousHits.length;
     let target;
-    if (!shipFound) {
-      console.log("random target");
+    if (hits === 0 || hits === longestRemainingShip) {
       target = getRandomTarget();
-    } else if (previousHits.length === 1) {
-      console.log("adj target");
-      const adjacents = getAdjacents();
-      const adjIndex = Math.floor(Math.random() * adjacents.length)
-      target = adjacents[adjIndex];
-    } else if (previousHits.length > 1) {
-      console.log("next target");
-      target = getNextTarget();
-      if (!target) {
-        console.log("opposite target");
-        target = getOppositeTarget();
-        previousHits.length = 1;
-      }
-      if (!target) {
-        console.log("new random target");
-        target = getRandomTarget();
-        previousHits.length = 0;
-        targetQueue.length = 0;
-      }
+    } else if (hits === 1) {
+      target = getAdjacentTarget();
+    } else {
+      target = getNextTarget() || getOppositeTarget() || getRandomTarget();
     }
-    console.log(target);
     enqueue(target);
+  }
+
+  function resetHits() {
+    previousHits.length = 0;
   }
 
   return {
@@ -150,8 +179,8 @@ export function Computer() {
     incrementScore,
     getRandomTarget,
     isComputer,
-
-    getPreviousHits,
+    enemyShipSunk,
+    getPreviousHit,
     saveTarget,
 
     getTargetCoordinates,

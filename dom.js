@@ -47,7 +47,7 @@ export default function Dom() {
     allShips.forEach((ship) => {
       toggleSelectedShip(ship);
       if (ship.parentElement.classList.contains("grid-cell")) {
-        console.log("clearing!");
+       
         clearPosition();
       }
       let shipPlaced = false;
@@ -131,16 +131,12 @@ export default function Dom() {
 
       if (shipOnGrid) {
         const parentCell = ship.parentElement;
-        console.log("parent:");
-        console.log(parentCell);
+        
         clearPosition(); // clear current position to stop parent cell interfering with validation
-        console.log("previous cells:");
-        console.log(parentCell);
-        console.log(parentCell.nextElementSibling);
+       
         toggleAxis(ship);
         if (validSnap(parentCell)) {
-          console.log("new cells valid, ship flipped:");
-          console.log(ship);
+         
           const width = ship.offsetWidth;
           const height = ship.offsetHeight;
           ship.style.height = `${width}px`;

@@ -144,6 +144,7 @@ export function Board() {
   }
 
   function getCell(i, j) {
+    if(i > 9 || i < 0 || j > 9 || j < 0) return false
     return board[i][j];
   }
   return {

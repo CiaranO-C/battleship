@@ -154,7 +154,7 @@ function Game() {
         switchTurn();
         playTurn();
       }
-    }, 100);
+    }, 1000);
   }
 
   function confirmAllShips() {

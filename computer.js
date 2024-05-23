@@ -123,8 +123,8 @@ export function Computer() {
     } else if (previousHits.length === 1) {
       console.log("adj target");
       const adjacents = getAdjacents();
-      console.log(adjacents);
-      target = adjacents[0];
+      const adjIndex = Math.floor(Math.random() * adjacents.length)
+      target = adjacents[adjIndex];
     } else if (previousHits.length > 1) {
       console.log("next target");
       target = getNextTarget();

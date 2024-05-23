@@ -81,21 +81,21 @@ function Game() {
 
   function computerTurn() {
     const computer = currentPlayer;
-
     computer.queueTarget();
     const [i, j] = computer.getTargetCoordinates();
 
     const targetCell = gui.getCell(i, j);
     const cellObj = getOpponent().board.getCell(i, j);
+    const shipFound = cellObj.hasShip(); 
 
-    if (cellObj.hasShip()) {
+    if (shipFound) {
       currentPlayer.saveTarget([i, j]);
     }
     targetCell.click();
-
-    if (cellObj.hasShip()) {
+    // after click, check if it was sunk
+    if (shipFound) {
       const shipObj = cellObj.getShip();
-      if (shipObj.isSunk()) computer.enemyShipSunk(shipObj.getLength());
+      if (shipObj.isSunk()) computer.enemyShipSunk();
     }
   }
 

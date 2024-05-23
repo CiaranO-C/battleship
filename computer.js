@@ -1,6 +1,5 @@
 import { Player } from "./player.js";
 import { game } from "./index.js";
-import { arrayOfLengths } from "./shipsData.js";
 
 export function Computer() {
   const player = Player(true);
@@ -19,25 +18,14 @@ export function Computer() {
 
   const previousHits = [];
   const targetQueue = [];
-  let longestRemainingShip = 5;
-  let shipLengths = arrayOfLengths();
+  let sunkShip = false;
 
-  function updateLongestShip() {
-    let longest = 0;
-    shipLengths.forEach((length) => {
-      if (length > longest) {
-        longest = length;
-      }
-    });
-    longestRemainingShip = longest;
+  function disableSunkShip() {
+    sunkShip = false;
   }
 
-  function enemyShipSunk(sunkShipLength) {
-    console.log(`longest -> ${longestRemainingShip}`);
-    const i = shipLengths.indexOf(sunkShipLength);
-    shipLengths.splice(i, 1);
-    updateLongestShip();
-    console.log(`longest -> ${longestRemainingShip}`);
+  function enemyShipSunk() {
+    sunkShip = true;
   }
 
   function getPreviousHit() {
@@ -159,8 +147,9 @@ export function Computer() {
     console.log(previousHits);
     const hits = previousHits.length;
     let target;
-    if (hits === 0 || hits === longestRemainingShip) {
+    if (hits === 0 || sunkShip) {
       target = getRandomTarget();
+      disableSunkShip();
     } else if (hits === 1) {
       target = getAdjacentTarget();
     } else {

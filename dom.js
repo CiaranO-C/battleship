@@ -49,13 +49,14 @@ export default function Dom() {
     const allShips = getAllShips();
     allShips.forEach((ship) => {
       toggleSelectedShip(ship);
+      const parentPlayer = getParentPlayer(ship);
       if (ship.parentElement.classList.contains("grid-cell")) {
         clearPosition();
       }
       let shipPlaced = false;
       while (!shipPlaced) {
         const [i, j] = getRandomIndex();
-        const parentCell = getCell(i, j);
+        const parentCell = getCell(parentPlayer, i, j);
         if (validSnap(parentCell)) {
           parentCell.appendChild(ship);
           setPosition();
@@ -126,28 +127,27 @@ export default function Dom() {
     ship.style.width = `${height}px`;
   }
 
-  function rotateShip() {
+  function rotateShip(event) {
     const ship = getSelectedShip();
-    if (ship) {
-      const shipOnGrid = ship.parentElement.classList.contains("grid-cell");
+    const parentPlayer = getParentPlayer(ship);
+    const shipOnGrid = ship.parentElement.classList.contains("grid-cell");
+    const commonParent = parentPlayer.contains(ship) && parentPlayer.contains(event.target);
+    if (shipOnGrid && commonParent) {
+      const parentCell = ship.parentElement;
 
-      if (shipOnGrid) {
-        const parentCell = ship.parentElement;
+      clearPosition(); // clear current position to stop parent cell interfering with validation
 
-        clearPosition(); // clear current position to stop parent cell interfering with validation
-
+      toggleAxis(ship);
+      if (validSnap(parentCell)) {
+        const width = ship.offsetWidth;
+        const height = ship.offsetHeight;
+        ship.style.height = `${width}px`;
+        ship.style.width = `${height}px`;
+      } else {
         toggleAxis(ship);
-        if (validSnap(parentCell)) {
-          const width = ship.offsetWidth;
-          const height = ship.offsetHeight;
-          ship.style.height = `${width}px`;
-          ship.style.width = `${height}px`;
-        } else {
-          toggleAxis(ship);
-          return false;
-        }
-        setPosition();
+        return false;
       }
+      setPosition();
     }
   }
 
@@ -159,7 +159,7 @@ export default function Dom() {
   }
 
   const restart = document.getElementById("restart");
-  const rotate = document.getElementById("rotateShip");
+  const rotateButtons = document.querySelectorAll(".rotate-ship");
   const random = document.getElementById("randomize");
   const reset = document.getElementById("returnShips");
   const playButtonContainer = document.querySelector(".start-game-container");
@@ -170,13 +170,13 @@ export default function Dom() {
 
   function enableButtons() {
     // restart.addEventListener('click', restartGame);
-    rotate.addEventListener("click", rotateShip);
+    rotateButtons.forEach(btn => btn.addEventListener("click", rotateShip));
     random.addEventListener("click", randomize);
     reset.addEventListener("click", dockShips);
   }
 
   function disableSetup() {
-    rotate.removeEventListener("click", rotateShip);
+    rotateButtons.forEach(btn => btn.removeEventListener("click", rotateShip));
     random.removeEventListener("click", randomize);
     reset.removeEventListener("click", dockShips);
     playButtonContainer.classList.add("hidden");
@@ -230,8 +230,9 @@ export default function Dom() {
     });
   }
 
-  function getCell(i, j) {
-    const cell = document.querySelector(
+  function getCell(parentPlayer, i, j) {
+    console.log(parentPlayer)
+    const cell = parentPlayer.querySelector(
       `.grid-cell[data-i="${i}"][data-j="${j}"]`,
     );
     return cell;
@@ -261,6 +262,7 @@ export default function Dom() {
   }
 
   function getCellsArray(startCell, ship = getSelectedShip()) {
+    const parentPlayer = getParentPlayer(ship);
     const { length, axis } = getShipInfo(ship);
     let [i, j] = getIndexAttributes(startCell);
 
@@ -273,9 +275,9 @@ export default function Dom() {
 
     for (n; n < shipEnd; n++) {
       if (isHorizontal) {
-        currentCell = getCell(i, n);
+        currentCell = getCell(parentPlayer, i, n);
       } else {
-        currentCell = getCell(n, j);
+        currentCell = getCell(parentPlayer, n, j);
       }
       cells.push(currentCell);
     }
@@ -326,16 +328,13 @@ export default function Dom() {
     });
   }
 
-  function getParentBoard(ship) {
+  function getParentPlayer(ship) {
     const playerOne = document.getElementById("playerOne");
     const playerTwo = document.getElementById("playerTwo");
-    console.log(ship)
-    console.log(playerOne.contains(ship))
-    const id = playerOne.contains(ship) ? playerOne.id : playerTwo.id;
-
-    const board = document.querySelector(`#${id} .board`);
-    console.log(id)
-    return board;
+    console.log(ship);
+    console.log(playerOne.contains(ship));
+    const parent = playerOne.contains(ship) ? playerOne : playerTwo;
+    return parent;
   }
 
   function dragAndDrop() {
@@ -346,8 +345,7 @@ export default function Dom() {
     let newY = 0;
 
     ships.forEach((ship) => {
-      const parentBoard = getParentBoard(ship);
-      const parentId = parentBoard.id;
+      const parentPlayer = getParentPlayer(ship);
       let shipTop = 0;
       let shipLeft = 0;
       let anchorX;
@@ -371,7 +369,7 @@ export default function Dom() {
       }
 
       function checkWithinBoard(shipX, shipY) {
-        const boardXY = parentBoard.getBoundingClientRect();
+        const boardXY = parentPlayer.getBoundingClientRect();
         const isWithin =
           shipX >= boardXY.left &&
           shipX <= boardXY.right &&
@@ -440,7 +438,7 @@ export default function Dom() {
         if (
           target !== undefined &&
           target.classList.contains("grid-cell") &&
-          parentBoard.contains(target)
+          parentPlayer.contains(target)
         ) {
           const isValid = validSnap(target);
           if (isValid) {
@@ -470,7 +468,7 @@ export default function Dom() {
 
       function snapUp() {
         const [i, j] = getIndexAttributes(ship.parentElement);
-        const newParent = parentBoard.querySelector(
+        const newParent = parentPlayer.querySelector(
           `.grid-cell[data-i="${i - 1}"][data-j="${j}"]`,
         );
         snapTo(newParent);
@@ -478,7 +476,7 @@ export default function Dom() {
 
       function snapDown() {
         const [i, j] = getIndexAttributes(ship.parentElement);
-        const newParent = parentBoard.querySelector(
+        const newParent = parentPlayer.querySelector(
           `.grid-cell[data-i="${i + 1}"][data-j="${j}"]`,
         );
         snapTo(newParent);
@@ -486,7 +484,7 @@ export default function Dom() {
 
       function snapLeft() {
         const [i, j] = getIndexAttributes(ship.parentElement);
-        const newParent = parentBoard.querySelector(
+        const newParent = parentPlayer.querySelector(
           `.grid-cell[data-i="${i}"][data-j="${j - 1}"]`,
         );
         snapTo(newParent);
@@ -494,7 +492,7 @@ export default function Dom() {
 
       function snapRight() {
         const [i, j] = getIndexAttributes(ship.parentElement);
-        const newParent = parentBoard.querySelector(
+        const newParent = parentPlayer.querySelector(
           `.grid-cell[data-i="${i}"][data-j="${j + 1}"]`,
         );
         snapTo(newParent);

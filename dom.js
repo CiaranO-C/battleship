@@ -38,6 +38,11 @@ export default function Dom() {
     return ships;
   }
 
+  function getPlayerShips(player) {
+    const ships = player.querySelectorAll(".ship");
+    return ships;
+  }
+
   function getRandomIndex() {
     //random between 0-9
     const i = Math.floor(Math.random() * 10);
@@ -48,28 +53,26 @@ export default function Dom() {
   function randomize(event) {
     const button = event.target;
     const parentPlayer = getParentPlayer(button);
-    const allShips = getAllShips();
+    const ships = getPlayerShips(parentPlayer);
 
-    allShips.forEach((ship) => {
-      if (parentPlayer.contains(ship)) {
-        toggleSelectedShip(ship);
-        clearPosition(); //clears previous grid cells if already placed
-        let parentCell;
-        let validPosition = false;
-        while (!validPosition) {
-          const [i, j] = getRandomIndex();
-          parentCell = getCell(parentPlayer, i, j);
+    ships.forEach((ship) => {
+      toggleSelectedShip(ship);
+      clearPosition(); //clears previous grid cells if already placed
+      let parentCell;
+      let validPosition = false;
+      while (!validPosition) {
+        const [i, j] = getRandomIndex();
+        parentCell = getCell(parentPlayer, i, j);
+        validPosition = validSnap(parentCell);
+        //if still invalid try rotating
+        if (!validPosition) {
+          toggleAxis(ship);
+          spin();
           validPosition = validSnap(parentCell);
-          //if still invalid try rotating
-          if (!validPosition) {
-            toggleAxis(ship);
-            spin();
-            validPosition = validSnap(parentCell);
-          }
         }
-        parentCell.appendChild(ship);
-        setPosition();
       }
+      parentCell.appendChild(ship);
+      setPosition();
     });
   }
 
@@ -107,15 +110,17 @@ export default function Dom() {
     container.appendChild(point);
   }
 
-  function dockShips() {
-    const ships = getAllShips();
+  function dockShips(event) {
+    const button = event.target;
+    const parentPlayer = getParentPlayer(button);
+    const ships = getPlayerShips(parentPlayer);
     ships.forEach((ship) => {
       toggleSelectedShip(ship);
       clearPosition();
       ship.remove();
     });
-    renderDockedShips();
-    dragAndDrop();
+    renderPlayerShips(parentPlayer);
+    dragAndDrop(getPlayerShips(parentPlayer));
   }
 
   function spin() {
@@ -157,7 +162,7 @@ export default function Dom() {
   const restart = document.getElementById("restart");
   const rotateButtons = document.querySelectorAll(".rotate-ship");
   const shuffleButtons = document.querySelectorAll(".randomize");
-  const reset = document.getElementById("returnShips");
+  const resetButtons = document.querySelectorAll(".return-ships");
   const playButtonContainer = document.querySelector(".start-game-container");
 
   //function restartGame() {
@@ -168,7 +173,7 @@ export default function Dom() {
     // restart.addEventListener('click', restartGame);
     rotateButtons.forEach((btn) => btn.addEventListener("click", rotateShip));
     shuffleButtons.forEach((btn) => btn.addEventListener("click", randomize));
-    reset.addEventListener("click", dockShips);
+    resetButtons.forEach((btn) => btn.addEventListener("click", dockShips));
   }
 
   function disableSetup() {
@@ -178,7 +183,8 @@ export default function Dom() {
     shuffleButtons.forEach((btn) =>
       btn.removeEventListener("click", randomize),
     );
-    reset.removeEventListener("click", dockShips);
+    resetButtons.forEach((btn) => btn.removeEventListener("click", dockShips));
+
     playButtonContainer.classList.add("hidden");
     const selected = getSelectedShip();
     selected.classList.remove("selected-ship");
@@ -219,7 +225,6 @@ export default function Dom() {
   }
 
   function renderPlayerShips(player) {
-    console.log(player);
     shipsData.forEach((ship) => {
       const [name, length] = ship;
       const lowerCaseName = name.toLowerCase();
@@ -342,8 +347,7 @@ export default function Dom() {
     return parent;
   }
 
-  function dragAndDrop() {
-    const ships = document.querySelectorAll(".ship");
+  function dragAndDrop(ships = getAllShips()) {
     let startX = 0;
     let startY = 0;
     let newX = 0;

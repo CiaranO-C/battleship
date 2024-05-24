@@ -27,7 +27,7 @@ function toggleSelection(event) {
   }
 }
 
-scrollDownBtn.addEventListener("click", gameSetup, { once: true });
+scrollDownBtn.addEventListener("click", gameSetup);
 
 function gameSetup() {
   game = Game();
@@ -52,6 +52,11 @@ function scrollToGame() {
   gameContainer.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+function scrollToTop() {
+  const gameStartPage = document.querySelector(".game-start");
+  gameStartPage.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 function enablePlayButton() {
   const playButton = document.getElementById("playButton");
   playButton.addEventListener("click", () => {
@@ -63,17 +68,19 @@ function Game() {
   const { playerOne, playerTwo } = initalisePlayers();
   const gui = Dom();
   let currentPlayer = playerOne;
+  
 
   function setup() {
-    disableInputs();
+    toggleInputs();
     renderBoards();
-    gui.renderDockedShips();
+    gui.renderDockedShips(playerTwo);
     gui.enableButtons();
     gui.dragAndDrop();
   }
 
   function run() {
     if (confirmAllShips()) {
+      hideOverlay();
       gui.disableSetup();
       playTurn();
     }
@@ -86,7 +93,7 @@ function Game() {
 
     const targetCell = gui.getCell(i, j);
     const cellObj = getOpponent().board.getCell(i, j);
-    const shipFound = cellObj.hasShip(); 
+    const shipFound = cellObj.hasShip();
 
     if (shipFound) {
       currentPlayer.saveTarget([i, j]);
@@ -100,7 +107,7 @@ function Game() {
   }
 
   function playTurn() {
-    toggleOverlay();
+    console.log(`${currentPlayer.getName()} turn!`);
     const opponent = getOpponent();
     disableAttacks(getBoard(currentPlayer));
     enableAttacks(getBoard(opponent));
@@ -140,10 +147,7 @@ function Game() {
     disableAttacks(getBoard(getOpponent()));
     hideBoards();
     declareWinner();
-    /*const again = playAgain();
-     */
-    console.log(currentPlayer.getScore());
-    console.log(`${currentPlayer.getName()} wins!`);
+    promptPlayAgain();
   }
 
   function endTurn() {
@@ -156,6 +160,38 @@ function Game() {
         playTurn();
       }
     }, 250);
+  }
+
+  function playAgain() {
+    console.log("play Again");
+  }
+  function confirmEndGame() {
+    scrollToTop();
+    toggleInputs();
+    resetGame();
+  }
+
+  function resetGame() {
+    game = null;
+  }
+
+  function promptPlayAgain() {
+    const container = document.querySelector("#playerTwo .overlay");
+    const winnerText = container.querySelector("h2");
+    const playAgainBtn = document.createElement("button");
+    const endGameBtn = document.createElement("button");
+    playAgainBtn.textContent = "Play Again";
+    endGameBtn.textContent = "End Game";
+
+    playAgainBtn.id = "playAgain";
+    endGameBtn.id = "endGame";
+
+    playAgainBtn.onclick = () => playAgain();
+    endGameBtn.onclick = () => confirmEndGame();
+    setTimeout(() => {
+      container.removeChild(winnerText);
+      container.append(playAgainBtn, endGameBtn);
+    }, 2500);
   }
 
   function confirmAllShips() {
@@ -187,11 +223,11 @@ function Game() {
     });
   }
 
-  function toggleOverlay() {
+  function hideOverlay() {
     const boards = document.querySelectorAll(".board");
     boards.forEach((board) => {
       const overlay = board.firstElementChild;
-      overlay.classList.toggle("hidden");
+      overlay.classList.toggle("hidden", true);
     });
   }
 
@@ -269,11 +305,15 @@ function Game() {
     return playerOne;
   }
 
-  function disableInputs() {
-    const inputs = document.querySelectorAll(".name-input");
-    for (let i = 0; i < inputs.length; i++) {}
-    inputs.forEach((input) => {
-      input.setAttribute("readOnly", true);
+  function toggleInputs() {
+    const inputOne = document.getElementById("playerOneName");
+    const inputTwo = document.getElementById("playerTwoName");
+    [inputOne, inputTwo].forEach((input) => {
+      if (input.readOnly) {
+        input.removeAttribute("readonly");
+      } else {
+        input.setAttribute("readonly", true);
+      }
     });
   }
 
@@ -294,14 +334,7 @@ function Game() {
   }
 
   function renderBoards() {
-    const boardOne = document.querySelector("#playerOne .board");
-    const boardTwo = document.querySelector("#playerTwo .board");
-    const overlays = document.querySelectorAll(".overlay");
-    overlays.forEach((overlay) => {
-      overlay.classList.toggle("hidden");
-    });
-    gui.renderPlayerBoard(boardOne, playerOne.board.getBoard());
-    gui.renderComputerBoard();
+    gui.renderBoards();
   }
 
   return { playerOne, playerTwo, run, setup, validateOpponentBoard };

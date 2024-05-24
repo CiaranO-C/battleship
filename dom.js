@@ -2,29 +2,32 @@ import { game } from "./index.js";
 import { shipsData } from "./shipsData.js";
 
 export default function Dom() {
-  function renderPlayerBoard(container, board) {
-    const length = board.length;
-    for (let i = 0; i < length; i++) {
-      for (let j = 0; j < length; j++) {
-        const cell = document.createElement("div");
-        cell.setAttribute("data-i", i);
-        cell.setAttribute("data-j", j);
-        const cellHasShip = board[i][j].hasShip();
-        cell.classList = cellHasShip ? "grid-cell ship" : "grid-cell";
-        container.appendChild(cell);
-      }
+  function renderBoards() {
+    const existingCells = document.querySelectorAll(".grid-cell");
+    if (existingCells.length) {
+      resetBoards(existingCells);
     }
+    const boardSize = 10;
+    const boards = document.querySelectorAll(".board");
+    boards.forEach((board) => renderPlayerBoard(board, boardSize));
+
+    const overlays = document.querySelectorAll(".overlay");
+    overlays.forEach((overlay) => {
+      overlay.classList.toggle("hidden");
+    });
   }
 
-  function renderComputerBoard() {
-    const container = document.querySelector("#playerTwo .board");
-    const length = 10;
-    for (let i = 0; i < length; i++) {
-      for (let j = 0; j < length; j++) {
+  function resetBoards(existing) {
+    existing.forEach((cell) => cell.remove());
+  }
+
+  function renderPlayerBoard(container, size) {
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
         const cell = document.createElement("div");
         cell.setAttribute("data-i", i);
         cell.setAttribute("data-j", j);
-        cell.classList.add("grid-cell");
+        cell.classList = "grid-cell";
         container.appendChild(cell);
       }
     }
@@ -47,7 +50,6 @@ export default function Dom() {
     allShips.forEach((ship) => {
       toggleSelectedShip(ship);
       if (ship.parentElement.classList.contains("grid-cell")) {
-       
         clearPosition();
       }
       let shipPlaced = false;
@@ -131,12 +133,11 @@ export default function Dom() {
 
       if (shipOnGrid) {
         const parentCell = ship.parentElement;
-        
+
         clearPosition(); // clear current position to stop parent cell interfering with validation
-       
+
         toggleAxis(ship);
         if (validSnap(parentCell)) {
-         
           const width = ship.offsetWidth;
           const height = ship.offsetHeight;
           ship.style.height = `${width}px`;
@@ -210,12 +211,21 @@ export default function Dom() {
     return ship;
   }
 
-  function renderDockedShips() {
+  function renderDockedShips(playerTwo) {
+    const one = document.getElementById("playerOne");
+    const two = document.getElementById("playerTwo");
+    const players = playerTwo.isComputer() ? [one] : [one, two];
+    players.forEach((player) => renderPlayerShips(player));
+  }
+
+  function renderPlayerShips(player) {
+    console.log(player);
     shipsData.forEach((ship) => {
       const [name, length] = ship;
       const lowerCaseName = name.toLowerCase();
       const shipDiv = createShip(name, length);
-      const dock = document.getElementById(`${lowerCaseName}Parent`);
+
+      const dock = player.querySelector(`.${lowerCaseName}-parent`);
       dock.appendChild(shipDiv);
     });
   }
@@ -316,15 +326,28 @@ export default function Dom() {
     });
   }
 
+  function getParentBoard(ship) {
+    const playerOne = document.getElementById("playerOne");
+    const playerTwo = document.getElementById("playerTwo");
+    console.log(ship)
+    console.log(playerOne.contains(ship))
+    const id = playerOne.contains(ship) ? playerOne.id : playerTwo.id;
+
+    const board = document.querySelector(`#${id} .board`);
+    console.log(id)
+    return board;
+  }
+
   function dragAndDrop() {
     const ships = document.querySelectorAll(".ship");
-    const board = document.querySelector("#playerOne .board");
     let startX = 0;
     let startY = 0;
     let newX = 0;
     let newY = 0;
 
     ships.forEach((ship) => {
+      const parentBoard = getParentBoard(ship);
+      const parentId = parentBoard.id;
       let shipTop = 0;
       let shipLeft = 0;
       let anchorX;
@@ -348,7 +371,7 @@ export default function Dom() {
       }
 
       function checkWithinBoard(shipX, shipY) {
-        const boardXY = board.getBoundingClientRect();
+        const boardXY = parentBoard.getBoundingClientRect();
         const isWithin =
           shipX >= boardXY.left &&
           shipX <= boardXY.right &&
@@ -414,7 +437,11 @@ export default function Dom() {
         );
         //elements[1] will return element directly underneath ship
         const target = elements[1];
-        if (target !== undefined && target.classList.contains("grid-cell")) {
+        if (
+          target !== undefined &&
+          target.classList.contains("grid-cell") &&
+          parentBoard.contains(target)
+        ) {
           const isValid = validSnap(target);
           if (isValid) {
             const canSnap = checkProximity(ship, target);
@@ -443,7 +470,7 @@ export default function Dom() {
 
       function snapUp() {
         const [i, j] = getIndexAttributes(ship.parentElement);
-        const newParent = document.querySelector(
+        const newParent = parentBoard.querySelector(
           `.grid-cell[data-i="${i - 1}"][data-j="${j}"]`,
         );
         snapTo(newParent);
@@ -451,7 +478,7 @@ export default function Dom() {
 
       function snapDown() {
         const [i, j] = getIndexAttributes(ship.parentElement);
-        const newParent = document.querySelector(
+        const newParent = parentBoard.querySelector(
           `.grid-cell[data-i="${i + 1}"][data-j="${j}"]`,
         );
         snapTo(newParent);
@@ -459,7 +486,7 @@ export default function Dom() {
 
       function snapLeft() {
         const [i, j] = getIndexAttributes(ship.parentElement);
-        const newParent = document.querySelector(
+        const newParent = parentBoard.querySelector(
           `.grid-cell[data-i="${i}"][data-j="${j - 1}"]`,
         );
         snapTo(newParent);
@@ -467,7 +494,7 @@ export default function Dom() {
 
       function snapRight() {
         const [i, j] = getIndexAttributes(ship.parentElement);
-        const newParent = document.querySelector(
+        const newParent = parentBoard.querySelector(
           `.grid-cell[data-i="${i}"][data-j="${j + 1}"]`,
         );
         snapTo(newParent);
@@ -515,26 +542,13 @@ export default function Dom() {
         ship.style.top = `${shipTop}px`;
         ship.style.left = `${shipLeft}px`;
       }
-
-      function getShip() {
-        const length = Number(ship.getAttribute("data-length"));
-        const testShip = game.playerOne.board.createShip(length);
-        return testShip;
-      }
-
-      function validPosition(ship, i, j) {
-        const isValid = game.playerOne.board.validatePosition(ship, i, j);
-
-        return isValid;
-      }
     });
   }
 
   return {
     addPoint,
     getIndexAttributes,
-    renderPlayerBoard,
-    renderComputerBoard,
+    renderBoards,
     renderDockedShips,
     dragAndDrop,
     enableButtons,

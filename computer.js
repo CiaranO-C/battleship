@@ -155,6 +155,7 @@ export function Computer() {
     } else {
       target = getNextTarget() || getOppositeTarget() || getRandomTarget();
     }
+    console.log(target);
     enqueue(target);
   }
 

@@ -45,31 +45,30 @@ export default function Dom() {
     return [i, j];
   }
 
-  function randomize() {
+  function randomize(event) {
+    const button = event.target;
+    const parentPlayer = getParentPlayer(button);
     const allShips = getAllShips();
+
     allShips.forEach((ship) => {
-      toggleSelectedShip(ship);
-      const parentPlayer = getParentPlayer(ship);
-      if (ship.parentElement.classList.contains("grid-cell")) {
-        clearPosition();
-      }
-      let shipPlaced = false;
-      while (!shipPlaced) {
-        const [i, j] = getRandomIndex();
-        const parentCell = getCell(parentPlayer, i, j);
-        if (validSnap(parentCell)) {
-          parentCell.appendChild(ship);
-          setPosition();
-          shipPlaced = true;
-        } else {
-          toggleAxis(ship);
-          spin();
-          if (validSnap(parentCell)) {
-            parentCell.appendChild(ship);
-            setPosition();
-            shipPlaced = true;
+      if (parentPlayer.contains(ship)) {
+        toggleSelectedShip(ship);
+        clearPosition(); //clears previous grid cells if already placed
+        let parentCell;
+        let validPosition = false;
+        while (!validPosition) {
+          const [i, j] = getRandomIndex();
+          parentCell = getCell(parentPlayer, i, j);
+          validPosition = validSnap(parentCell);
+          //if still invalid try rotating
+          if (!validPosition) {
+            toggleAxis(ship);
+            spin();
+            validPosition = validSnap(parentCell);
           }
         }
+        parentCell.appendChild(ship);
+        setPosition();
       }
     });
   }
@@ -131,23 +130,20 @@ export default function Dom() {
     const ship = getSelectedShip();
     const parentPlayer = getParentPlayer(ship);
     const shipOnGrid = ship.parentElement.classList.contains("grid-cell");
-    const commonParent = parentPlayer.contains(ship) && parentPlayer.contains(event.target);
+    const commonParent =
+      parentPlayer.contains(ship) && parentPlayer.contains(event.target);
     if (shipOnGrid && commonParent) {
       const parentCell = ship.parentElement;
+      clearPosition(); // stop parent cell interfering with validation
+      toggleAxis(ship); // toggle to check if rotation valid
 
-      clearPosition(); // clear current position to stop parent cell interfering with validation
-
-      toggleAxis(ship);
       if (validSnap(parentCell)) {
-        const width = ship.offsetWidth;
-        const height = ship.offsetHeight;
-        ship.style.height = `${width}px`;
-        ship.style.width = `${height}px`;
+        spin(); //if valid update ship dimensions
       } else {
-        toggleAxis(ship);
+        toggleAxis(ship); //return attribute to previous
         return false;
       }
-      setPosition();
+      setPosition(); // set to previous or new position
     }
   }
 
@@ -160,7 +156,7 @@ export default function Dom() {
 
   const restart = document.getElementById("restart");
   const rotateButtons = document.querySelectorAll(".rotate-ship");
-  const random = document.getElementById("randomize");
+  const shuffleButtons = document.querySelectorAll(".randomize");
   const reset = document.getElementById("returnShips");
   const playButtonContainer = document.querySelector(".start-game-container");
 
@@ -170,14 +166,18 @@ export default function Dom() {
 
   function enableButtons() {
     // restart.addEventListener('click', restartGame);
-    rotateButtons.forEach(btn => btn.addEventListener("click", rotateShip));
-    random.addEventListener("click", randomize);
+    rotateButtons.forEach((btn) => btn.addEventListener("click", rotateShip));
+    shuffleButtons.forEach((btn) => btn.addEventListener("click", randomize));
     reset.addEventListener("click", dockShips);
   }
 
   function disableSetup() {
-    rotateButtons.forEach(btn => btn.removeEventListener("click", rotateShip));
-    random.removeEventListener("click", randomize);
+    rotateButtons.forEach((btn) =>
+      btn.removeEventListener("click", rotateShip),
+    );
+    shuffleButtons.forEach((btn) =>
+      btn.removeEventListener("click", randomize),
+    );
     reset.removeEventListener("click", dockShips);
     playButtonContainer.classList.add("hidden");
     const selected = getSelectedShip();
@@ -231,7 +231,7 @@ export default function Dom() {
   }
 
   function getCell(parentPlayer, i, j) {
-    console.log(parentPlayer)
+    console.log(parentPlayer);
     const cell = parentPlayer.querySelector(
       `.grid-cell[data-i="${i}"][data-j="${j}"]`,
     );
@@ -319,21 +319,26 @@ export default function Dom() {
   }
 
   function clearPosition(ship = getSelectedShip()) {
-    const { name } = getShipInfo(ship);
-    const cells = document.querySelectorAll(`.grid-cell[data-id="${name}"]`);
+    if (ship.parentElement.classList.contains("grid-cell")) {
+      const parentPlayer = getParentPlayer(ship);
+      const { name } = getShipInfo(ship);
+      const cells = parentPlayer.querySelectorAll(
+        `.grid-cell[data-id="${name}"]`,
+      );
 
-    cells.forEach((cell) => {
-      cell.removeAttribute("data-id");
-      cell.classList.remove("occupied");
-    });
+      cells.forEach((cell) => {
+        cell.removeAttribute("data-id");
+        cell.classList.remove("occupied");
+      });
+    }
   }
 
-  function getParentPlayer(ship) {
+  function getParentPlayer(element) {
     const playerOne = document.getElementById("playerOne");
     const playerTwo = document.getElementById("playerTwo");
-    console.log(ship);
-    console.log(playerOne.contains(ship));
-    const parent = playerOne.contains(ship) ? playerOne : playerTwo;
+
+    console.log(playerOne.contains(element));
+    const parent = playerOne.contains(element) ? playerOne : playerTwo;
     return parent;
   }
 

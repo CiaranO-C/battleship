@@ -17,7 +17,7 @@ export default function Dom() {
     players.forEach((player) => {
       if (!player.classList.contains("active")) opponent = player;
     });
-    return opponent
+    return opponent;
   }
 
   function switchCurrentPlayer() {
@@ -352,6 +352,7 @@ export default function Dom() {
 
   function playButtonUI() {
     const overlay = document.querySelector("#playerTwo .overlay");
+    removeAllChildren(overlay);
     const container = document.createElement("div");
     container.classList.add("start-game-container");
     const message = document.createElement("h2");
@@ -370,12 +371,15 @@ export default function Dom() {
   function enablePlayButton() {
     const playButton = document.getElementById("playButton");
     playButton.addEventListener("click", () => {
+      const overlay = getCurrentOverlay();
+      removeAllChildren(overlay);
       game.run();
     });
   }
 
   function confirmShipsUI() {
-    const overlay = getCurrentOverlay();
+    let overlay = getCurrentOverlay();
+    if (!overlay) overlay = document.querySelector("#playerTwo .overlay");
     const container = document.createElement("div");
     container.classList.add("start-game-container");
     const message = document.createElement("h2");
@@ -385,6 +389,7 @@ export default function Dom() {
     confirmButton.textContent = "Done";
     confirmButton.id = "confirmButton";
 
+    overlay.classList.toggle('hidden', false)
     container.append(message, confirmButton);
     overlay.appendChild(container);
   }
@@ -395,7 +400,7 @@ export default function Dom() {
       const player = currentPlayer();
       const ships = getPlayerShips(player);
       if (allShipsPlaced()) {
-        console.log("ready to play!");
+        removeAllChildren(getCurrentOverlay())
         hideOverlays();
         playButtonUI();
         switchCurrentPlayer();
@@ -548,11 +553,11 @@ export default function Dom() {
         ships = getPlayerShips(currentPlayer());
         shipPacks = getShipPackages(ships);
       } else {
-        console.log('bug1')
+        console.log("bug1");
         const playerOneShips = getPlayerShips(currentPlayer());
-        console.log(opponent())
+        console.log(opponent());
         const playerTwoShips = getPlayerShips(opponent());
-        console.log('bug3')
+        console.log("bug3");
         ships = [playerOneShips, playerTwoShips];
         const packOne = getShipPackages(playerOneShips);
         const packTwo = getShipPackages(playerTwoShips);
@@ -771,9 +776,22 @@ export default function Dom() {
     return parent;
   }
 
+  function playAgain() {
+    clearOverlays();
+    renderBoards();
+    renderDockedShips();
+    placeShips();
+  }
+
+  function clearOverlays() {
+    const overlays = document.querySelectorAll(".overlay");
+    overlays.forEach((overlay) => removeAllChildren(overlay));
+  }
+
   return {
     setup,
     run,
+    playAgain,
     addPoint,
     getIndexAttributes,
     allShipsPlaced,

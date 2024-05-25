@@ -3,9 +3,14 @@ import { sumLengths, arrayOfLengths, shipsData } from "./shipsData.js";
 import Cell from "./gridCell.js";
 
 export function Board() {
-  const board = buildBoard();
+  let board = buildBoard();
   const missedAttacks = [];
   let totalHits = 0;
+
+  function resetBoard(){
+    totalHits = 0;
+    board = buildBoard();
+  }
 
   function getBoard() {
     return board;
@@ -147,6 +152,7 @@ export function Board() {
     return board[i][j];
   }
   return {
+    resetBoard,
     getBoard,
     buildBoard,
     placeShip,

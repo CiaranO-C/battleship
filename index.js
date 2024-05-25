@@ -137,7 +137,7 @@ function Game() {
     disableAttacks(getBoard(getOpponent()));
     hideBoards();
     declareWinner();
-    promptPlayAgain();
+    promptPlayAgain(); //should move
   }
 
   function endTurn() {
@@ -153,8 +153,12 @@ function Game() {
   }
 
   function playAgain() {
-    console.log("play Again");
+    gui.playAgain();
+    playerOne.board.resetBoard();
+    playerTwo.board.resetBoard();
+    if (playerTwo.isComputer()) playerTwo.board.randomize();
   }
+
   function confirmEndGame() {
     scrollToTop();
     toggleInputs();

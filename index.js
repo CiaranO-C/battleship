@@ -7,7 +7,6 @@ let game;
 const computerName = document.getElementById("computer");
 const playerTwoName = document.getElementById("playerTwoName");
 const playerTwoSelection = document.querySelector(".player-two-select");
-const scrollDownBtn = document.getElementById("scrollDown");
 
 document.addEventListener("DOMContentLoaded", () => {
   const playerOneNameInput = document.getElementById("playerOneName");
@@ -26,30 +25,17 @@ function toggleSelection(event) {
     selection.classList.toggle("selected");
   }
 }
-
+const scrollDownBtn = document.getElementById("scrollDown");
 scrollDownBtn.addEventListener("click", gameSetup);
+function scrollToGame() {
+  const gameContainer = document.querySelector(".game-container");
+  gameContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+}
 
 function gameSetup() {
   game = Game();
   game.setup();
-  renderPlayerNames();
   scrollToGame();
-  enablePlayButton();
-}
-
-function renderPlayerNames() {
-  const nameOne = document.getElementById("playerOneName").value;
-  const nameTwo = document.querySelector(".selected").value;
-  const playerOneName = document.querySelector("#playerOne p");
-  const playerTwoName = document.querySelector("#playerTwo p");
-
-  playerOneName.textContent = nameOne;
-  playerTwoName.textContent = nameTwo;
-}
-
-function scrollToGame() {
-  const gameContainer = document.querySelector(".game-container");
-  gameContainer.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function scrollToTop() {
@@ -57,41 +43,56 @@ function scrollToTop() {
   gameStartPage.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function enablePlayButton() {
-  const playButton = document.getElementById("playButton");
-  playButton.addEventListener("click", () => {
-    game.run();
-  });
-}
-
 function Game() {
   const { playerOne, playerTwo } = initalisePlayers();
   const gui = Dom();
   let currentPlayer = playerOne;
-  
+
+  function initalisePlayers() {
+    const playerOne = Player();
+    const playerOneName = document.getElementById("playerOneName");
+    playerOne.setName(playerOneName.value);
+
+    let playerTwo;
+    const selected = document.querySelector(".selected");
+    if (selected.id === "computer") {
+      playerTwo = Computer();
+    } else {
+      playerTwo = Player();
+      playerTwo.setName(selected.value);
+    }
+    return { playerOne, playerTwo };
+  }
 
   function setup() {
-    toggleInputs();
-    renderBoards();
-    gui.renderDockedShips(playerTwo);
-    gui.enableButtons();
-    gui.dragAndDrop();
+    gui.setup();
   }
 
   function run() {
     if (confirmAllShips()) {
-      hideOverlay();
+      hideOverlays();
       gui.disableSetup();
       playTurn();
     }
   }
 
+  function playTurn() {
+    const opponent = getOpponent();
+    disableAttacks(getBoard(currentPlayer));
+    enableAttacks(getBoard(opponent));
+
+    if (currentPlayer.isComputer()) {
+      computerTurn();
+    }
+  }
+
   function computerTurn() {
+    const opponentContainer = document.getElementById("playerOne");
     const computer = currentPlayer;
     computer.queueTarget();
     const [i, j] = computer.getTargetCoordinates();
 
-    const targetCell = gui.getCell(i, j);
+    const targetCell = gui.getCell(opponentContainer, i, j);
     const cellObj = getOpponent().board.getCell(i, j);
     const shipFound = cellObj.hasShip();
 
@@ -103,17 +104,6 @@ function Game() {
     if (shipFound) {
       const shipObj = cellObj.getShip();
       if (shipObj.isSunk()) computer.enemyShipSunk();
-    }
-  }
-
-  function playTurn() {
-    console.log(`${currentPlayer.getName()} turn!`);
-    const opponent = getOpponent();
-    disableAttacks(getBoard(currentPlayer));
-    enableAttacks(getBoard(opponent));
-
-    if (currentPlayer.isComputer()) {
-      computerTurn();
     }
   }
 
@@ -223,14 +213,6 @@ function Game() {
     });
   }
 
-  function hideOverlay() {
-    const boards = document.querySelectorAll(".board");
-    boards.forEach((board) => {
-      const overlay = board.firstElementChild;
-      overlay.classList.toggle("hidden", true);
-    });
-  }
-
   function enableAttacks(board) {
     board.addEventListener("click", handleAttack);
   }
@@ -303,38 +285,6 @@ function Game() {
       return playerTwo;
     }
     return playerOne;
-  }
-
-  function toggleInputs() {
-    const inputOne = document.getElementById("playerOneName");
-    const inputTwo = document.getElementById("playerTwoName");
-    [inputOne, inputTwo].forEach((input) => {
-      if (input.readOnly) {
-        input.removeAttribute("readonly");
-      } else {
-        input.setAttribute("readonly", true);
-      }
-    });
-  }
-
-  function initalisePlayers() {
-    const playerOne = Player();
-    const playerOneName = document.getElementById("playerOneName");
-    playerOne.setName(playerOneName.value);
-
-    let playerTwo;
-    const selected = document.querySelector(".selected");
-    if (selected.id === "computer") {
-      playerTwo = Computer();
-    } else {
-      playerTwo = Player();
-      playerTwo.setName(selected.value);
-    }
-    return { playerOne, playerTwo };
-  }
-
-  function renderBoards() {
-    gui.renderBoards();
   }
 
   return { playerOne, playerTwo, run, setup, validateOpponentBoard };

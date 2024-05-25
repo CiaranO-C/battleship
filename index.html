@@ -46,7 +46,7 @@
         <button id="scrollDown">Ready your ships!</button>
       </div>
       <div class="game-container">
-        <div class="player-container" id="playerOne">
+        <div class="player-container active" id="playerOne">
           <p>Player One</p>
           <div class="board">
             <div class="overlay"></div>
@@ -81,14 +81,9 @@
         <div class="player-container" id="playerTwo">
           <p>Computer</p>
           <div class="board">
-            <div class="overlay hidden">
-              <div class="start-game-container">
-                <p>Place ships and play!</p>
-                <button id="playButton">Play</button>
-              </div>
-            </div>
+            <div class="overlay hidden"></div>
           </div>
-          <div class="board-tools">
+          <div class="board-tools hidden">
             <div class="ship-container">
               <div class="ship-parent carrier-parent"></div>
               <div class="ship-parent patrol-parent"></div>

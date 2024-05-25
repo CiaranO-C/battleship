@@ -6,13 +6,47 @@ export default function Dom() {
   const shuffleButtons = document.querySelectorAll(".randomize");
   const resetButtons = document.querySelectorAll(".return-ships");
 
+  function currentPlayer() {
+    const currentPlayer = document.querySelector(".active");
+    return currentPlayer;
+  }
+
+  function opponent() {
+    let opponent;
+    const players = document.querySelectorAll(".player-container");
+    players.forEach((player) => {
+      if (!player.classList.contains("active")) opponent = player;
+    });
+    return opponent
+  }
+
+  function switchCurrentPlayer() {
+    const players = document.querySelectorAll(".player-container");
+    players.forEach((player) => player.classList.toggle("active"));
+  }
+
+  function getCurrentOverlay() {
+    const overlays = document.querySelectorAll(".overlay");
+    let currentOverlay;
+    overlays.forEach((elem) => {
+      if (!elem.classList.contains("hidden")) currentOverlay = elem;
+    });
+    return currentOverlay;
+  }
+
+  function switchOverlay() {
+    const overlays = document.querySelectorAll(".overlay");
+    overlays.forEach((overlay) => {
+      overlay.classList.toggle("hidden");
+    });
+    switchCurrentPlayer();
+  }
+
   function setup() {
     toggleInputs();
     renderPlayerNames();
     renderBoards();
     renderDockedShips();
-    enableButtons();
-    dragAndDrop(); //needs revising
     placeShips();
   }
 
@@ -293,12 +327,11 @@ export default function Dom() {
     });
   }
 
-  function currentPlayer() {
-    const currentPlayer = document.querySelector(".active");
-    return currentPlayer;
-  }
-
   function placeShips() {
+    const player = currentPlayer();
+    const ships = getPlayerShips(player);
+    shipButtons(player).enable();
+    dragAndDrop(ships);
     const twoPlayer = document.querySelector(".selected").id !== "computer";
     if (twoPlayer) {
       confirmShipsUI();
@@ -307,24 +340,6 @@ export default function Dom() {
       playButtonUI();
       enablePlayButton();
     }
-  }
-
-  function enableConfirmButton() {
-    const button = document.getElementById("confirmButton");
-    button.addEventListener("click", () => {
-      const player = currentPlayer();
-      const ships = getPlayerShips(player);
-      if (allShipsPlaced()) {
-        console.log('ready to play!')
-        hideOverlays();
-        playButtonUI();
-        enablePlayButton();
-      } else if (allShipsPlaced(ships)) {
-        console.log('Not ready yet!')
-        switchCurrentPlayer();
-        switchConfirmShipUI();
-      }
-    });
   }
 
   function hideOverlays() {
@@ -374,25 +389,26 @@ export default function Dom() {
     overlay.appendChild(container);
   }
 
-  function switchCurrentPlayer() {
-    const players = document.querySelectorAll(".player-container");
-    players.forEach((player) => player.classList.toggle("active"));
-  }
+  function enableConfirmButton() {
+    const button = document.getElementById("confirmButton");
+    button.addEventListener("click", () => {
+      const player = currentPlayer();
+      const ships = getPlayerShips(player);
+      if (allShipsPlaced()) {
+        console.log("ready to play!");
+        hideOverlays();
+        playButtonUI();
+        switchCurrentPlayer();
+        enablePlayButton();
+      } else if (allShipsPlaced(ships)) {
+        shipButtons(currentPlayer()).disable();
 
-  function switchOverlay() {
-    const overlays = document.querySelectorAll(".overlay");
-    overlays.forEach((overlay) => {
-      overlay.classList.toggle("hidden");
+        switchConfirmShipUI();
+        shipButtons(currentPlayer()).enable();
+        const currentPlayerShips = getPlayerShips(currentPlayer());
+        dragAndDrop(currentPlayerShips);
+      }
     });
-  }
-
-  function getCurrentOverlay() {
-    const overlays = document.querySelectorAll(".overlay");
-    let currentOverlay;
-    overlays.forEach((elem) => {
-      if (!elem.classList.contains("hidden")) currentOverlay = elem;
-    });
-    return currentOverlay;
   }
 
   function switchConfirmShipUI() {
@@ -404,6 +420,30 @@ export default function Dom() {
     enableConfirmButton();
   }
 
+  function run() {
+    hideOverlays();
+    disableSetup();
+  }
+
+  function shipButtons(player) {
+    const rotateBtn = player.querySelector(".rotate-ship");
+    const shuffleBtn = player.querySelector(".randomize");
+    const resetBtn = player.querySelector(".return-ships");
+
+    function enable() {
+      rotateBtn.addEventListener("click", rotateShip);
+      shuffleBtn.addEventListener("click", randomize);
+      resetBtn.addEventListener("click", dockShips);
+    }
+
+    function disable() {
+      rotateBtn.removeEventListener("click", rotateShip);
+      shuffleBtn.removeEventListener("click", randomize);
+      resetBtn.removeEventListener("click", dockShips);
+    }
+    return { enable, disable };
+  }
+
   function disableSetup() {
     rotateButtons.forEach((btn) =>
       btn.removeEventListener("click", rotateShip),
@@ -413,8 +453,8 @@ export default function Dom() {
     );
     resetButtons.forEach((btn) => btn.removeEventListener("click", dockShips));
 
-    const selected = getSelectedShip();
-    selected.classList.remove("selected-ship");
+    toggleSelectedShip();
+
     //clone to remove dragNdrop event listeners
     const ships = getAllShips();
     ships.forEach((ship) => {
@@ -480,6 +520,7 @@ export default function Dom() {
       parentCell.appendChild(ship);
       setPosition();
     });
+    toggleSelectedShip();
   }
 
   function allShipsPlaced(ships = getAllShips()) {
@@ -500,18 +541,38 @@ export default function Dom() {
 
   function confirmShips() {
     if (allShipsPlaced()) {
-      const shipArray = [];
-      const ships = getAllShips();
-      ships.forEach((ship) => {
-        const parentCell = ship.parentElement;
-        const [i, j] = getIndexAttributes(parentCell);
-        const { name, length, axis } = getShipInfo(ship);
-        const shipPackage = { i, j, name, length, axis };
-        shipArray.push(shipPackage);
-      });
-      return shipArray;
+      const onePlayer = document.querySelector(".selected").id === "computer";
+      let ships;
+      let shipPacks;
+      if (onePlayer) {
+        ships = getPlayerShips(currentPlayer());
+        shipPacks = getShipPackages(ships);
+      } else {
+        console.log('bug1')
+        const playerOneShips = getPlayerShips(currentPlayer());
+        console.log(opponent())
+        const playerTwoShips = getPlayerShips(opponent());
+        console.log('bug3')
+        ships = [playerOneShips, playerTwoShips];
+        const packOne = getShipPackages(playerOneShips);
+        const packTwo = getShipPackages(playerTwoShips);
+        shipPacks = { packOne, packTwo };
+      }
+      return shipPacks;
     }
     return null;
+  }
+
+  function getShipPackages(shipsArray) {
+    const shipPacks = [];
+    shipsArray.forEach((ship) => {
+      const parentCell = ship.parentElement;
+      const [i, j] = getIndexAttributes(parentCell);
+      const { name, length, axis } = getShipInfo(ship);
+      const shipPackage = { i, j, name, length, axis };
+      shipPacks.push(shipPackage);
+    });
+    return shipPacks;
   }
 
   function addPoint(player) {
@@ -544,6 +605,7 @@ export default function Dom() {
 
   function rotateShip(event) {
     const ship = getSelectedShip();
+    if (!ship) return null;
     const parentPlayer = getParentPlayer(ship);
     const shipOnGrid = ship.parentElement.classList.contains("grid-cell");
     const commonParent =
@@ -579,7 +641,7 @@ export default function Dom() {
   function toggleSelectedShip(ship) {
     const oldShip = getSelectedShip();
     if (oldShip) oldShip.classList.toggle("selected-ship", false);
-    ship.classList.toggle("selected-ship", true);
+    if (ship) ship.classList.toggle("selected-ship", true);
   }
 
   function getSelectedShip() {
@@ -711,15 +773,13 @@ export default function Dom() {
 
   return {
     setup,
+    run,
     addPoint,
     getIndexAttributes,
-    renderBoards,
-    renderDockedShips,
-    dragAndDrop,
-    enableButtons,
+    allShipsPlaced,
+    getPlayerShips,
     confirmShips,
     disableSetup,
     getCell,
-    renderPlayerNames,
   };
 }

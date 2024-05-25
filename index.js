@@ -45,6 +45,7 @@ function scrollToTop() {
 
 function Game() {
   const { playerOne, playerTwo } = initalisePlayers();
+
   const gui = Dom();
   let currentPlayer = playerOne;
 
@@ -70,8 +71,7 @@ function Game() {
 
   function run() {
     if (confirmAllShips()) {
-      hideOverlays();
-      gui.disableSetup();
+      gui.run();
       playTurn();
     }
   }
@@ -185,21 +185,33 @@ function Game() {
   }
 
   function confirmAllShips() {
-    const validShips = gui.confirmShips();
-    if (validShips) {
-      validShips.forEach((ship) => {
-        let newShip;
-        const { i, j, name, length, axis } = ship;
-        if (axis === "vertical") {
-          newShip = playerOne.board.createShip(name, length, axis);
-        } else {
-          newShip = playerOne.board.createShip(name, length);
-        }
-        playerOne.board.placeShip(newShip, i, j);
-      });
+    const shipPackages = gui.confirmShips();
+    if (shipPackages) {
+      let playerOneShips;
+      if (playerTwo.isComputer()) {
+        playerOneShips = shipPackages;
+        generateShips(playerOne, playerOneShips);
+      } else {
+        const { packOne, packTwo } = shipPackages;
+        generateShips(playerOne, packOne);
+        generateShips(playerTwo, packTwo);
+      }
       return true;
     }
     return false;
+  }
+
+  function generateShips(player, shipPackages) {
+    shipPackages.forEach((pack) => {
+      const { i, j, name, length, axis } = pack;
+      let newShip;
+      if (axis === "vertical") {
+        newShip = player.board.createShip(name, length, axis);
+      } else {
+        newShip = player.board.createShip(name, length);
+      }
+      player.board.placeShip(newShip, i, j);
+    });
   }
 
   function switchTurn() {

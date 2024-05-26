@@ -161,6 +161,8 @@ function Game() {
         generateShips(playerOne, playerOneShips);
       } else {
         const { packOne, packTwo } = shipPackages;
+        console.dir(packOne)
+        console.dir(packTwo)
         generateShips(playerOne, packOne);
         generateShips(playerTwo, packTwo);
       }

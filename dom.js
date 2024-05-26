@@ -125,13 +125,6 @@ export default function Dom() {
     });
   }
 
-  function enableButtons() {
-    // restart.addEventListener('click', restartGame);
-    rotateButtons.forEach((btn) => btn.addEventListener("click", rotateShip));
-    shuffleButtons.forEach((btn) => btn.addEventListener("click", randomize));
-    resetButtons.forEach((btn) => btn.addEventListener("click", dockShips));
-  }
-
   function dragAndDrop(ships = getAllShips()) {
     let startX = 0;
     let startY = 0;
@@ -338,18 +331,20 @@ export default function Dom() {
   }
 
   function placeShips() {
-    const player = currentPlayer();
-    const ships = getPlayerShips(player);
-    shipButtons(player).enable();
-    dragAndDrop(ships);
     const twoPlayer = document.querySelector(".selected").id !== "computer";
+    let player;
     if (twoPlayer) {
+      player = currentPlayer();
       confirmShipsUI();
       enableConfirmButton();
     } else {
+      player = document.querySelector("#playerOne");
       playButtonUI();
       enablePlayButton();
     }
+    const ships = getPlayerShips(player);
+    shipButtons(player).enable();
+    dragAndDrop(ships);
   }
 
   function hideOverlays() {
@@ -362,13 +357,12 @@ export default function Dom() {
 
   function playButtonUI() {
     const overlay = document.querySelector("#playerTwo .overlay");
-    removeAllChildren(overlay);
     const container = document.createElement("div");
     container.classList.add("start-game-container");
     const message = document.createElement("h2");
     const playButton = document.createElement("button");
 
-    message.textContent = "Place your ships!";
+    message.textContent = "Ready?";
     playButton.textContent = "Play";
     playButton.id = "playButton";
 
@@ -381,15 +375,16 @@ export default function Dom() {
   function enablePlayButton() {
     const playButton = document.getElementById("playButton");
     playButton.addEventListener("click", () => {
-      const overlay = getCurrentOverlay();
-      removeAllChildren(overlay);
-      game.run();
+      if (allShipsPlaced()) {
+        clearOverlays();
+        game.run();
+      }
     });
   }
 
   function confirmShipsUI() {
-    let overlay = getCurrentOverlay();
-    if (!overlay) overlay = document.querySelector("#playerTwo .overlay");
+    let overlay = getOpponent().querySelector(".overlay");
+    // if (!overlay) overlay = document.querySelector("#playerTwo .overlay");
     const container = document.createElement("div");
     container.classList.add("start-game-container");
     const message = document.createElement("h2");
@@ -410,16 +405,17 @@ export default function Dom() {
       const player = currentPlayer();
       const ships = getPlayerShips(player);
       if (allShipsPlaced()) {
-        removeAllChildren(getCurrentOverlay());
-        hideOverlays();
-        playButtonUI();
+        clearOverlays();
+        hideBoards();
         switchCurrentPlayer();
+        playButtonUI();
         enablePlayButton();
       } else if (allShipsPlaced(ships)) {
         shipButtons(currentPlayer()).disable();
-
+        console.log(currentPlayer())
         switchConfirmShipUI();
         shipButtons(currentPlayer()).enable();
+        console.log(currentPlayer())
         const currentPlayerShips = getPlayerShips(currentPlayer());
         dragAndDrop(currentPlayerShips);
       }
@@ -427,8 +423,7 @@ export default function Dom() {
   }
 
   function switchConfirmShipUI() {
-    const previousOverlay = getCurrentOverlay();
-    removeAllChildren(previousOverlay);
+    clearOverlays();
     switchOverlay();
     const newOverlay = getCurrentOverlay();
     confirmShipsUI(newOverlay);
@@ -436,7 +431,13 @@ export default function Dom() {
   }
 
   function run() {
-    hideOverlays();
+    const onePlayer = document.querySelector(".selected").id === "computer";
+    if (onePlayer) {
+      hideOverlays();
+    } else {
+      const opponentOverlay = getOpponent().querySelector(".overlay");
+      opponentOverlay.classList.add("hidden");
+    }
     disableSetup();
   }
 
@@ -560,14 +561,13 @@ export default function Dom() {
       let ships;
       let shipPacks;
       if (onePlayer) {
-        ships = getPlayerShips(currentPlayer());
+        ships = getPlayerShips(document.querySelector('#playerOne'));
         shipPacks = getShipPackages(ships);
       } else {
-        console.log("bug1");
-        const playerOneShips = getPlayerShips(currentPlayer());
-        console.log(getOpponent());
-        const playerTwoShips = getPlayerShips(getOpponent());
-        console.log("bug3");
+        
+        const playerOneShips = getPlayerShips(document.querySelector('#playerOne'));
+        const playerTwoShips = getPlayerShips(document.querySelector('#playerTwo'));
+        
         ships = [playerOneShips, playerTwoShips];
         const packOne = getShipPackages(playerOneShips);
         const packTwo = getShipPackages(playerTwoShips);
@@ -890,6 +890,7 @@ export default function Dom() {
   }
 
   function declareWinner(winnerName) {
+    clearOverlays();
     const overlays = document.querySelectorAll(".overlay");
     overlays.forEach((overlay) => {
       const winner = document.createElement("h2");
@@ -910,9 +911,13 @@ export default function Dom() {
   }
 
   function passDeviceListener(overlay) {
-    overlay.addEventListener("click", () => {
-      overlay.classList.add("hidden");
-    });
+    overlay.addEventListener(
+      "click",
+      () => {
+        overlay.classList.add("hidden");
+      },
+      { once: true },
+    );
   }
 
   function passDevice() {

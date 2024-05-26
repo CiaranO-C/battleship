@@ -26,13 +26,14 @@ function toggleSelection(event) {
   }
 }
 const scrollDownBtn = document.getElementById("scrollDown");
-scrollDownBtn.addEventListener("click", gameSetup);
+scrollDownBtn.addEventListener("click", initialiseGame);
+
 function scrollToGame() {
   const gameContainer = document.querySelector(".game-container");
   gameContainer.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function gameSetup() {
+function initialiseGame() {
   game = Game();
   game.setup();
   scrollToGame();
@@ -161,8 +162,8 @@ function Game() {
         generateShips(playerOne, playerOneShips);
       } else {
         const { packOne, packTwo } = shipPackages;
-        console.dir(packOne)
-        console.dir(packTwo)
+        console.dir(packOne);
+        console.dir(packTwo);
         generateShips(playerOne, packOne);
         generateShips(playerTwo, packTwo);
       }

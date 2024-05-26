@@ -412,10 +412,10 @@ export default function Dom() {
         enablePlayButton();
       } else if (allShipsPlaced(ships)) {
         shipButtons(currentPlayer()).disable();
-        console.log(currentPlayer())
+        console.log(currentPlayer());
         switchConfirmShipUI();
         shipButtons(currentPlayer()).enable();
-        console.log(currentPlayer())
+        console.log(currentPlayer());
         const currentPlayerShips = getPlayerShips(currentPlayer());
         dragAndDrop(currentPlayerShips);
       }
@@ -435,6 +435,7 @@ export default function Dom() {
     if (onePlayer) {
       hideOverlays();
     } else {
+      hideShips();
       const opponentOverlay = getOpponent().querySelector(".overlay");
       opponentOverlay.classList.add("hidden");
     }
@@ -561,13 +562,16 @@ export default function Dom() {
       let ships;
       let shipPacks;
       if (onePlayer) {
-        ships = getPlayerShips(document.querySelector('#playerOne'));
+        ships = getPlayerShips(document.querySelector("#playerOne"));
         shipPacks = getShipPackages(ships);
       } else {
-        
-        const playerOneShips = getPlayerShips(document.querySelector('#playerOne'));
-        const playerTwoShips = getPlayerShips(document.querySelector('#playerTwo'));
-        
+        const playerOneShips = getPlayerShips(
+          document.querySelector("#playerOne"),
+        );
+        const playerTwoShips = getPlayerShips(
+          document.querySelector("#playerTwo"),
+        );
+
         ships = [playerOneShips, playerTwoShips];
         const packOne = getShipPackages(playerOneShips);
         const packTwo = getShipPackages(playerTwoShips);
@@ -649,6 +653,7 @@ export default function Dom() {
   }
 
   const restart = document.getElementById("restart");
+  
 
   //function restartGame() {
   //overwrite game object with new game, remove listeners and old elements
@@ -792,10 +797,19 @@ export default function Dom() {
     promptPlayAgain();
   }
 
+  function hideShips() {
+    const ships = document.querySelectorAll(".ship");
+    ships.forEach((ship) => {
+      ship.classList.add("hidden");
+    });
+  }
+
   function confirmEndGame() {
     scrollToTop();
     toggleInputs();
     clearOverlays();
+    const scores = document.querySelectorAll("point-container");
+    scores.forEach((container) => removeAllChildren(container));
     game.confirmEndGame();
   }
 
@@ -921,9 +935,11 @@ export default function Dom() {
   }
 
   function passDevice() {
-    clearOverlays();
-    hideBoards();
-    passDeviceUI();
+    setTimeout(() => {
+      clearOverlays();
+      hideBoards();
+      passDeviceUI();
+    }, 1000);
   }
 
   function clearOverlays() {

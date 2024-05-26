@@ -86,6 +86,7 @@ export function Computer() {
     const j = jLast + jDiff;
 
     const next = [i, j];
+    console.log(next)
     const validTarget = game.validateOpponentBoard(next);
 
     if (!validTarget) return false;
@@ -144,8 +145,8 @@ export function Computer() {
   }
 
   function queueTarget() {
-    console.log(previousHits);
     const hits = previousHits.length;
+    console.log(previousHits.length)
     let target;
     if (hits === 0 || sunkShip) {
       target = getRandomTarget();

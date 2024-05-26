@@ -38,11 +38,6 @@ function gameSetup() {
   scrollToGame();
 }
 
-function scrollToTop() {
-  const gameStartPage = document.querySelector(".game-start");
-  gameStartPage.scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
 function Game() {
   const { playerOne, playerTwo } = initalisePlayers();
 
@@ -77,13 +72,21 @@ function Game() {
   }
 
   function playTurn() {
-    const opponent = getOpponent();
-    disableAttacks(getBoard(currentPlayer));
-    enableAttacks(getBoard(opponent));
-
+    gui.toggleBoardListeners();
     if (currentPlayer.isComputer()) {
       computerTurn();
     }
+  }
+
+  function sendAttack(coords) {
+    const validCell = validateOpponentBoard(coords);
+    if (validCell) {
+      const [i, j] = coords;
+      const opponent = getOpponent();
+      opponent.board.recieveAttack(i, j);
+      return validCell;
+    }
+    return false;
   }
 
   function computerTurn() {
@@ -91,7 +94,7 @@ function Game() {
     const computer = currentPlayer;
     computer.queueTarget();
     const [i, j] = computer.getTargetCoordinates();
-
+    console.log(i, j);
     const targetCell = gui.getCell(opponentContainer, i, j);
     const cellObj = getOpponent().board.getCell(i, j);
     const shipFound = cellObj.hasShip();
@@ -99,6 +102,7 @@ function Game() {
     if (shipFound) {
       currentPlayer.saveTarget([i, j]);
     }
+    console.log(targetCell);
     targetCell.click();
     // after click, check if it was sunk
     if (shipFound) {
@@ -107,37 +111,18 @@ function Game() {
     }
   }
 
-  function updateScores() {
-    currentPlayer.incrementScore();
-    const player = currentPlayer === playerOne ? "playerOne" : "playerTwo";
-    gui.addPoint(player);
-  }
-
   function checkForWinner() {
     const opponent = getOpponent();
     if (opponent.board.shipsSunk()) {
-      updateScores();
+      gui.gameResult(currentPlayer.getName());
+      currentPlayer.incrementScore();
       return true;
     }
     return false;
   }
 
-  function declareWinner() {
-    const name = currentPlayer.getName();
-
-    const overlays = document.querySelectorAll(".overlay");
-    overlays.forEach((overlay) => {
-      const winner = document.createElement("h2");
-      winner.textContent = `${name} wins!`;
-      overlay.appendChild(winner);
-    });
-  }
-
   function endGame() {
-    disableAttacks(getBoard(getOpponent()));
-    hideBoards();
-    declareWinner();
-    promptPlayAgain(); //should move
+    gui.endGame();
   }
 
   function endTurn() {
@@ -147,45 +132,24 @@ function Game() {
         endGame();
       } else {
         switchTurn();
+        gui.switchTurn();
         playTurn();
       }
     }, 250);
   }
 
   function playAgain() {
-    gui.playAgain();
     playerOne.board.resetBoard();
     playerTwo.board.resetBoard();
     if (playerTwo.isComputer()) playerTwo.board.randomize();
   }
 
   function confirmEndGame() {
-    scrollToTop();
-    toggleInputs();
     resetGame();
   }
 
   function resetGame() {
     game = null;
-  }
-
-  function promptPlayAgain() {
-    const container = document.querySelector("#playerTwo .overlay");
-    const winnerText = container.querySelector("h2");
-    const playAgainBtn = document.createElement("button");
-    const endGameBtn = document.createElement("button");
-    playAgainBtn.textContent = "Play Again";
-    endGameBtn.textContent = "End Game";
-
-    playAgainBtn.id = "playAgain";
-    endGameBtn.id = "endGame";
-
-    playAgainBtn.onclick = () => playAgain();
-    endGameBtn.onclick = () => confirmEndGame();
-    setTimeout(() => {
-      container.removeChild(winnerText);
-      container.append(playAgainBtn, endGameBtn);
-    }, 2500);
   }
 
   function confirmAllShips() {
@@ -222,78 +186,18 @@ function Game() {
     currentPlayer = currentPlayer === playerOne ? playerTwo : playerOne;
   }
 
-  function hideBoards() {
-    const overlays = document.querySelectorAll(".overlay");
-    overlays.forEach((overlay) => {
-      overlay.classList.remove("hidden");
-    });
-  }
-
-  function enableAttacks(board) {
-    board.addEventListener("click", handleAttack);
-  }
-
-  function disableAttacks(board) {
-    board.removeEventListener("click", handleAttack);
-  }
-
-  function handleAttack(event) {
-    const target = event.target;
-    if (validAttack(target)) {
-      const attackSuccessful = sendAttack(target);
-      if (attackSuccessful) endTurn();
-    }
-  }
-
-  function validAttack(target) {
-    if (target.classList.contains("grid-cell")) {
-      const classes = Array.from(target.classList);
-      if (classes.includes("hit") || classes.includes("miss")) return false;
-      return true;
-    }
-    return false;
-  }
-
   function validateOpponentBoard(target) {
     let isValid = false;
     const opponent = getOpponent();
     const [i, j] = target;
+    console.log(i, j);
     const cell = opponent.board.getCell(i, j);
     if (cell) {
       isValid = opponent.board.validateAttack(cell);
+      console.log(isValid);
+      if (isValid) return cell;
     }
     return isValid;
-  }
-
-  function sendAttack(cell) {
-    const [i, j] = gui.getIndexAttributes(cell);
-    const opponent = getOpponent();
-    const validAttack = opponent.board.recieveAttack(i, j);
-
-    if (validAttack) {
-      markCell(cell, opponent.board.getCell(i, j));
-      disableAttacks(getBoard(getOpponent()));
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  function markCell(uiCell, cell) {
-    if (cell.hasShip()) {
-      uiCell.classList.add("hit");
-    } else {
-      uiCell.classList.add("miss");
-    }
-  }
-
-  function getBoard(player) {
-    const boards = document.querySelectorAll(".board");
-    if (player === playerOne) {
-      return boards[0];
-    } else {
-      return boards[1];
-    }
   }
 
   function getOpponent() {
@@ -303,7 +207,17 @@ function Game() {
     return playerOne;
   }
 
-  return { playerOne, playerTwo, run, setup, validateOpponentBoard };
+  return {
+    playerOne,
+    playerTwo,
+    setup,
+    run,
+    endTurn,
+    playAgain,
+    confirmEndGame,
+    validateOpponentBoard,
+    sendAttack,
+  };
 }
 
 export { game };

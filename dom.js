@@ -11,7 +11,7 @@ export default function Dom() {
     return currentPlayer;
   }
 
-  function opponent() {
+  function getOpponent() {
     let opponent;
     const players = document.querySelectorAll(".player-container");
     players.forEach((player) => {
@@ -40,6 +40,17 @@ export default function Dom() {
       overlay.classList.toggle("hidden");
     });
     switchCurrentPlayer();
+  }
+
+  function toggleSelectedShip(ship) {
+    const oldShip = getSelectedShip();
+    if (oldShip) oldShip.classList.toggle("selected-ship", false);
+    if (ship) ship.classList.toggle("selected-ship", true);
+  }
+
+  function getSelectedShip() {
+    const selected = document.querySelector(".selected-ship");
+    return selected;
   }
 
   function setup() {
@@ -101,7 +112,6 @@ export default function Dom() {
   }
 
   function renderPlayerShips(player) {
-    console.log(player);
     if (player.id === "playerTwo") {
       player.querySelector(".board-tools").classList.remove("hidden");
     }
@@ -389,7 +399,7 @@ export default function Dom() {
     confirmButton.textContent = "Done";
     confirmButton.id = "confirmButton";
 
-    overlay.classList.toggle('hidden', false)
+    overlay.classList.toggle("hidden", false);
     container.append(message, confirmButton);
     overlay.appendChild(container);
   }
@@ -400,7 +410,7 @@ export default function Dom() {
       const player = currentPlayer();
       const ships = getPlayerShips(player);
       if (allShipsPlaced()) {
-        removeAllChildren(getCurrentOverlay())
+        removeAllChildren(getCurrentOverlay());
         hideOverlays();
         playButtonUI();
         switchCurrentPlayer();
@@ -555,8 +565,8 @@ export default function Dom() {
       } else {
         console.log("bug1");
         const playerOneShips = getPlayerShips(currentPlayer());
-        console.log(opponent());
-        const playerTwoShips = getPlayerShips(opponent());
+        console.log(getOpponent());
+        const playerTwoShips = getPlayerShips(getOpponent());
         console.log("bug3");
         ships = [playerOneShips, playerTwoShips];
         const packOne = getShipPackages(playerOneShips);
@@ -581,7 +591,8 @@ export default function Dom() {
   }
 
   function addPoint(player) {
-    const container = document.getElementById(`${player}Points`);
+    const id = player.id;
+    const container = document.getElementById(`${id}Points`);
     const point = document.createElement("div");
     point.classList.add("point");
     container.appendChild(point);
@@ -643,17 +654,6 @@ export default function Dom() {
   //overwrite game object with new game, remove listeners and old elements
   // }
 
-  function toggleSelectedShip(ship) {
-    const oldShip = getSelectedShip();
-    if (oldShip) oldShip.classList.toggle("selected-ship", false);
-    if (ship) ship.classList.toggle("selected-ship", true);
-  }
-
-  function getSelectedShip() {
-    const selected = document.querySelector(".selected-ship");
-    return selected;
-  }
-
   function createShip(name, length) {
     const ship = document.createElement("div");
     name = name.toLowerCase();
@@ -665,7 +665,6 @@ export default function Dom() {
   }
 
   function getCell(parentPlayer, i, j) {
-    console.log(parentPlayer);
     const cell = parentPlayer.querySelector(
       `.grid-cell[data-i="${i}"][data-j="${j}"]`,
     );
@@ -771,9 +770,13 @@ export default function Dom() {
     const playerOne = document.getElementById("playerOne");
     const playerTwo = document.getElementById("playerTwo");
 
-    console.log(playerOne.contains(element));
     const parent = playerOne.contains(element) ? playerOne : playerTwo;
     return parent;
+  }
+
+  function gameResult(winnerName) {
+    addPoint(currentPlayer());
+    declareWinner(winnerName);
   }
 
   function playAgain() {
@@ -783,14 +786,154 @@ export default function Dom() {
     placeShips();
   }
 
+  function endGame() {
+    disableAttacks(getBoard(getOpponent()));
+    hideBoards();
+    promptPlayAgain();
+  }
+
+  function confirmEndGame() {
+    scrollToTop();
+    toggleInputs();
+    clearOverlays();
+    game.confirmEndGame();
+  }
+
+  function scrollToTop() {
+    const gameStartPage = document.querySelector(".game-start");
+    gameStartPage.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function promptPlayAgain() {
+    const container = document.querySelector("#playerTwo .overlay");
+    const playAgainBtn = document.createElement("button");
+    const endGameBtn = document.createElement("button");
+    playAgainBtn.textContent = "Play Again";
+    endGameBtn.textContent = "End Game";
+
+    playAgainBtn.id = "playAgain";
+    endGameBtn.id = "endGame";
+
+    playAgainBtn.onclick = () => {
+      playAgain();
+      game.playAgain();
+    };
+    endGameBtn.onclick = () => {
+      confirmEndGame();
+      game.confirmEndGame();
+    };
+
+    setTimeout(() => {
+      removeAllChildren(container);
+      container.append(playAgainBtn, endGameBtn);
+    }, 2500);
+  }
+
+  function toggleBoardListeners() {
+    disableAttacks(getBoard(currentPlayer()));
+    enableAttacks(getBoard(getOpponent()));
+  }
+
+  function switchTurn() {
+    const twoPlayer = document.querySelector(".selected").id !== "computer";
+    switchCurrentPlayer();
+    if (twoPlayer) passDevice();
+  }
+
+  function getBoard(player) {
+    const boards = player.querySelector(".board");
+    return boards;
+  }
+
+  function disableAttacks(board) {
+    board.removeEventListener("click", handleAttack);
+  }
+
+  function enableAttacks(board) {
+    board.addEventListener("click", handleAttack);
+  }
+
+  function handleAttack(event) {
+    const target = event.target;
+    if (validClick(target)) {
+      const coords = getIndexAttributes(target);
+      const cellAttacked = game.sendAttack(coords);
+      if (cellAttacked) {
+        markCell(target, cellAttacked);
+        game.endTurn();
+      }
+    }
+  }
+
+  function validClick(target) {
+    if (target.classList.contains("grid-cell")) {
+      const classes = Array.from(target.classList);
+      if (classes.includes("hit") || classes.includes("miss")) return false;
+      return true;
+    }
+    return false;
+  }
+
+  function markCell(uiCell, cell) {
+    if (cell.hasShip()) {
+      uiCell.classList.add("hit");
+    } else {
+      uiCell.classList.add("miss");
+    }
+  }
+
+  function hideBoards() {
+    const overlays = document.querySelectorAll(".overlay");
+    overlays.forEach((overlay) => {
+      overlay.classList.remove("hidden");
+    });
+  }
+
+  function declareWinner(winnerName) {
+    const overlays = document.querySelectorAll(".overlay");
+    overlays.forEach((overlay) => {
+      const winner = document.createElement("h2");
+      winner.textContent = `${winnerName} wins!`;
+      overlay.appendChild(winner);
+    });
+  }
+
+  function passDeviceUI() {
+    const player = currentPlayer();
+    const name = player.firstElementChild.textContent;
+    const opponent = getOpponent();
+    const overlay = opponent.querySelector(".overlay");
+    const message = document.createElement("h2");
+    message.textContent = `Pass to ${name}`;
+    passDeviceListener(overlay);
+    overlay.appendChild(message);
+  }
+
+  function passDeviceListener(overlay) {
+    overlay.addEventListener("click", () => {
+      overlay.classList.add("hidden");
+    });
+  }
+
+  function passDevice() {
+    clearOverlays();
+    hideBoards();
+    passDeviceUI();
+  }
+
   function clearOverlays() {
     const overlays = document.querySelectorAll(".overlay");
     overlays.forEach((overlay) => removeAllChildren(overlay));
   }
 
   return {
+    switchCurrentPlayer,
+    switchTurn,
     setup,
     run,
+    toggleBoardListeners,
+    gameResult,
+    endGame,
     playAgain,
     addPoint,
     getIndexAttributes,

@@ -22,5 +22,5 @@ A more organised and structured version of the code will be displayed on the **b
 ## Why Include This Project?
 Despite the original code being a bit messy, hard for others... or even myself to follow, it serves as a milestone in my journey, highlighting things about me as a developer:
 - A willingness to reflect on earlier decisions and identify areas for improvement as my skills have grown.
-- My progression from writing monolithic code, to a more module and maintainable approach.
+- My progression from writing monolithic code, to a more modular and maintainable approach.
 - An understanding of foundational JavaScript and CSS concepts, which laid the groundwork for more advanced projects.

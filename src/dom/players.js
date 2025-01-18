@@ -33,8 +33,8 @@ function getPlayerShips(player) {
 function renderPlayerNames() {
   const nameOne = document.getElementById("playerOneName").value;
   const nameTwo = document.querySelector(".selected").value;
-  const playerOneName = document.querySelector("#playerOne p");
-  const playerTwoName = document.querySelector("#playerTwo p");
+  const playerOneName = document.querySelector("#playerOneHeader");
+  const playerTwoName = document.querySelector("#playerTwoHeader");
 
   playerOneName.textContent = nameOne;
   playerTwoName.textContent = nameTwo;

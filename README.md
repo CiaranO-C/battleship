@@ -6,7 +6,7 @@ Follow the link to test your mettle! [Battleship](https://battleship-seven-gamma
 ## Overview  
 This is a classic Battleship game built using vanilla JavaScript and CSS, created as one of my earlier projects while learning web development. The game is fully functional, featuring interactive gameplay against a computer opponent with basic AI (lots of if else!), or a local two player mode. Players can position their ships, attack their opponent, and aim to sink all the enemy ships to win.  
 
-## What I've Learnt, What I'd do differently  
+## Takeaways and Improvements
 This project was a great opportunity to dive into building an browser-based game from scratch. However, as I've grown as a developer, I've identified areas where it could be improved. To highlight this, I've left the original code untouched on the main branch as an example of my earlier work.  
 
 A more organised and structured version of the code will be displayed on the **battleship-improved** branch.

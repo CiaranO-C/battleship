@@ -1,4 +1,5 @@
 import { hideBoards } from "../boards.js";
+import { currentPlayer, getOpponent } from '../players.js';
 import { removeAllChildren } from "../utils.js";
 
 function clearOverlays() {

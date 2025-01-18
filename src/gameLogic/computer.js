@@ -1,5 +1,6 @@
+import { game } from "../gameController.js";
 import { Player } from "./player.js";
-import { game } from "../index.js";
+
 
 export function Computer() {
   const player = Player(true);

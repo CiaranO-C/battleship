@@ -17,7 +17,7 @@ A more organised and structured version of the code will be displayed on the **b
 
 ### What I'd do differently 
 - **Break down the code:** Refactor very large files into smaller modules, ideally as I go along! leaving this task until the end turns it into a more significant challenge, often breaking things as you go. *(e.g. separating game logic, Computer player logic, and UI updates)*.
-- **Spend longer planning:** Taking more time upfront to plan the structure and flow of the game would have saved time and effort in the long run, making the code easier to maintain and improve. Furthermore, I believe with a clearer direction the challenges of readability easier to tackle, as you have a game plan to refer back to.
+- **Spend longer planning:** Taking more time upfront to plan the structure and flow of the game would have saved time and effort in the long run, making the code easier to maintain and improve. Furthermore, I believe with a clearer direction the challenges of readability are easier to tackle, as you have a game plan to refer back to.
 
 ## Why Include This Project?
 Despite the original code being a bit messy, hard for others... or even myself to follow, it serves as a milestone in my journey, highlighting things about me as a developer:

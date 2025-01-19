@@ -1,5 +1,5 @@
 import { hideBoards } from "../boards.js";
-import { currentPlayer, getOpponent } from '../players.js';
+import { currentPlayer, getOpponent } from "../players.js";
 import { removeAllChildren } from "../utils.js";
 
 function clearOverlays() {
@@ -20,13 +20,15 @@ function passDeviceListener(overlay) {
 
 function passDeviceUI() {
   const player = currentPlayer();
-  const name = player.firstElementChild.textContent;
+  const name = document.querySelector(`#${player.id}Header`).textContent;
   const opponent = getOpponent();
   const overlay = opponent.querySelector(".overlay");
   const message = document.createElement("h2");
+  const prompt = document.createElement("p");
+  prompt.textContent = "click here!"
   message.textContent = `Pass to ${name}`;
   passDeviceListener(overlay);
-  overlay.appendChild(message);
+  overlay.append(message, prompt);
 }
 
 function passDevice() {
@@ -37,4 +39,25 @@ function passDevice() {
   }, 1000);
 }
 
-export { clearOverlays, passDevice, passDeviceListener, passDeviceUI };
+function validateInputs(inputs) {
+  if (
+    !Array.isArray(inputs) ||
+    !inputs.every((input) => input.classList.contains("name-input"))
+  )
+    throw new Error("Validate inputs must recieve an array of name inputs");
+
+  for (let i = 0; i < inputs.length; i++) {
+    const { id, value } = inputs[i];
+    if (id === "computer") continue;
+    if (!value) return false;
+  }
+  return true;
+}
+
+export {
+  clearOverlays,
+  passDevice,
+  passDeviceListener,
+  passDeviceUI,
+  validateInputs,
+};

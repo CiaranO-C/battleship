@@ -1,8 +1,8 @@
-import { Ship } from "./ship";
+import { Ship } from '../src/gameLogic/ship';
 
 describe("test ship object methods", () => {
     const shipLength = 5;
-    const testShip = Ship(shipLength);
+    const testShip = Ship("testShip", shipLength);
   test("Hit function increments hit counter", () => {
     testShip.hit();
     expect(testShip.hitsTaken()).toBe(1);
@@ -10,7 +10,7 @@ describe("test ship object methods", () => {
     expect(testShip.hitsTaken()).toBe(2);
   });
 
-  test("Check if ship is sunk when hits == length", () => {
+  test("Check if ship is sunk when hits === length", () => {
     expect(testShip.isSunk()).toBe(false);
     for(let i = 0; i<3; i++){
         testShip.hit();

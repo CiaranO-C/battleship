@@ -1,5 +1,10 @@
 import { shipsData } from "../../shipsData.js";
-import { getCurrentOverlay, hideBoards, switchOverlay } from "../boards.js";
+import {
+  getCurrentOverlay,
+  hideBoards,
+  switchOverlay,
+  toggleBoardTools,
+} from "../boards.js";
 import {
   currentPlayer,
   getOpponent,
@@ -18,7 +23,7 @@ import {
   rotateShip,
   toggleSelectedShip,
 } from "../ships/ships.js";
-import { queryDom } from "../utils.js";
+import { isOnePlayer, queryDom } from "../utils.js";
 import { enableResetButton } from "./end.js";
 import { enablePlayButton } from "./play.js";
 import { clearOverlays } from "./utils.js";
@@ -77,7 +82,7 @@ function renderDockedShips() {
 
 function renderPlayerShips(player) {
   if (player.id === "playerTwo") {
-    player.querySelector(".board-tools").classList.remove("hidden");
+    toggleBoardTools(false);
   }
   shipsData.forEach((ship) => {
     const [name, length] = ship;
@@ -144,7 +149,7 @@ function confirmShips() {
 
 function placeShips() {
   //enables ship placement for first player
-  const twoPlayer = document.querySelector(".selected").id !== "computer";
+  const twoPlayer = !isOnePlayer();
   let player;
   if (twoPlayer) {
     player = currentPlayer();

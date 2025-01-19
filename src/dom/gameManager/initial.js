@@ -38,7 +38,7 @@ function enableScrollToGame() {
 
     const inputsEmpty = !validateInputs([playerOneName, playerTwoName]);
     if (inputsEmpty) return;
-    
+
     initialiseGame(playerOneName, playerTwoName);
   });
 }

@@ -1,8 +1,8 @@
-import { game, resetGame } from "../../gameController.js";
-import { getBoard, hideBoards } from "../boards.js";
+import { handlePlayAgain, resetGame } from "../../gameController.js";
+import { getBoard, hideBoards, toggleBoardTools } from "../boards.js";
 import { currentPlayer, getOpponent, resetActivePlayer } from "../players.js";
 import { deleteShips } from "../ships/ships.js";
-import { removeAllChildren, scrollToTop } from "../utils.js";
+import { isOnePlayer, removeAllChildren, scrollToTop } from "../utils.js";
 import { disableAttacks } from "./play.js";
 import {
   placeShips,
@@ -40,6 +40,9 @@ function playAgain() {
   renderBoards();
   renderDockedShips();
   placeShips();
+  if (isOnePlayer()) {
+    document.querySelector("#playerOne .overlay").classList.add("hidden");
+  }
 }
 
 function endGame() {
@@ -57,6 +60,7 @@ function enableResetButton() {
       resetGame();
       setTimeout(() => {
         deleteShips();
+        toggleBoardTools(true);
       }, 450);
     },
     { once: true },
@@ -88,14 +92,15 @@ function promptPlayAgain() {
   playAgainBtn.id = "playAgain";
   endGameBtn.id = "endGame";
 
-  playAgainBtn.onclick = () => {
-    playAgain();
-    game.playAgain();
-  };
-  endGameBtn.onclick = () => {
-    confirmEndGame();
-    resetGame();
-  };
+  playAgainBtn.addEventListener("click", handlePlayAgain, { once: true });
+  endGameBtn.addEventListener(
+    "click",
+    () => {
+      confirmEndGame();
+      resetGame();
+    },
+    { once: true },
+  );
 
   setTimeout(() => {
     removeAllChildren(container);

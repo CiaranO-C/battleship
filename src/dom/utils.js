@@ -16,4 +16,18 @@ function scrollToTop() {
   gameStartPage.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-export { removeAllChildren, getRandomIndex, scrollToTop };
+function queryDom(selector, list = false) {
+  if (!selector) throw new Error("invalid selector supplied to queryDom");
+  if (list) {
+    return document.querySelectorAll(selector);
+  } else {
+    return document.querySelector(selector);
+  }
+}
+
+function isOnePlayer() {
+  const onePlayer = document.querySelector(".selected").id === "computer";
+  return onePlayer;
+}
+
+export { removeAllChildren, getRandomIndex, scrollToTop, queryDom, isOnePlayer };

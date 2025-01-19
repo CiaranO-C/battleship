@@ -16,6 +16,8 @@ export function Computer() {
 
   setName("Computer");
   board.randomize();
+  
+  
 
   const previousHits = [];
   const targetQueue = [];

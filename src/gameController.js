@@ -1,40 +1,56 @@
+import { getIndexAttributes, markCell } from "./dom/boards.js";
+import { endGame, gameResult } from "./dom/gameManager/end.js";
 import { scrollToGame } from "./dom/gameManager/initial.js";
-import { validateInputs } from "./dom/gameManager/utils.js";
-import { queryDom } from "./dom/utils.js";
+import { runGame, switchTurn, validClick } from "./dom/gameManager/play.js";
+import { confirmShips, setupGame } from "./dom/gameManager/setup.js";
+import { isOnePlayer } from "./dom/utils.js";
 import { Game } from "./gameLogic/game.js";
 
 let game = null;
 
-function initialiseGame() {
-  const playerOneName = queryDom("#playerOneName");
-  const playerTwoName = queryDom(".selected");
-  const inputsEmpty = !validateInputs([playerOneName, playerTwoName]);
-  if (inputsEmpty) return;
-
+function initialiseGame(playerOneName, playerTwoName) {
   game = Game(playerOneName, playerTwoName);
-  game.setup();
+  setupGame();
   scrollToGame();
+}
+
+function handleRunGame() {
+  const shipPacks = confirmShips();
+  if (!shipPacks) return;
+
+  const shipsConfirmed = game.confirmAllShips(shipPacks);
+
+  if (shipsConfirmed) {
+    runGame();
+    if (isOnePlayer()) game.playTurn();
+  }
+}
+
+function handleTurn({ target }) {
+  if (!validClick(target)) return;
+
+  const coords = getIndexAttributes(target);
+  const cellAttacked = game.sendAttack(coords);
+  if (!cellAttacked) return;
+
+  markCell(target, cellAttacked);
+  const winner = game.checkForWinner();
+
+  if (winner) {
+    setTimeout(() => {
+      gameResult(winner);
+      endGame();
+    }, 1500);
+  } else {
+    setTimeout(() => {
+      switchTurn();
+      game.endTurn();
+    }, 250);
+  }
 }
 
 function resetGame() {
   game = null;
 }
 
-export { game, initialiseGame, resetGame };
-//functions used outside of dom modules
-//setupGame,
-//switchCurrentPlayer,
-// switchTurn,
-//setup,
-// run,
-// toggleBoardListeners,
-//gameResult,
-//endGame,
-//playAgain,
-// addPoint,
-//getIndexAttributes,
-//allShipsPlaced,
-//getPlayerShips,
-//confirmShips,
-//  disableSetup,
-//getCell,
+export { game, initialiseGame, handleRunGame, handleTurn, resetGame };

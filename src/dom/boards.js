@@ -17,6 +17,12 @@ function switchOverlay() {
   switchCurrentPlayer();
 }
 
+function toggleBoardTools(bool) {
+  document
+    .querySelector("#playerTwo .board-tools")
+    .classList.toggle("hidden", bool);
+}
+
 function hideOverlays() {
   const boards = document.querySelectorAll(".board");
   boards.forEach((board) => {
@@ -69,6 +75,7 @@ export {
   switchOverlay,
   hideOverlays,
   getIndexAttributes,
+  toggleBoardTools,
   getCell,
   markCell,
   getBoard,

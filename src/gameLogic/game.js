@@ -1,17 +1,10 @@
 import { getCell } from "../dom/boards.js";
-import { endGame, gameResult } from "../dom/gameManager/end.js";
-import {
-  runGame,
-  toggleBoardListeners,
-  switchTurn as guiSwitchTurn,
-} from "../dom/gameManager/play.js";
 import { Computer } from "./computer.js";
 import { Player } from "./player.js";
 
 function Game(playerOneName, playerTwoName) {
   const { playerOne, playerTwo } = initalisePlayers();
 
-  //const gui = Dom();
   let currentPlayer = playerOne;
 
   function initalisePlayers() {
@@ -23,7 +16,7 @@ function Game(playerOneName, playerTwoName) {
       playerTwo = Computer();
     } else {
       playerTwo = Player();
-      playerTwo.setName(playerTwoName);
+      playerTwo.setName(playerTwoName.value);
     }
 
     return { playerOne, playerTwo };

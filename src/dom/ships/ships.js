@@ -1,7 +1,7 @@
-import { getCell, getIndexAttributes } from '../boards.js';
+import { getCell, getIndexAttributes } from "../boards.js";
 import { getParentPlayer, getPlayerShips } from "../players.js";
 import { getRandomIndex } from "../utils.js";
-import { setPosition, validSnap } from './dragAndDrop.js';
+import { setPosition, validSnap } from "./dragAndDrop.js";
 import { spin, toggleAxis } from "./shipPosition.js";
 
 function toggleSelectedShip(ship) {
@@ -131,6 +131,11 @@ function getShipPackages(shipsArray) {
   return shipPacks;
 }
 
+function deleteShips() {
+  const ships = getAllShips();
+  ships.forEach((ship) => ship.remove());
+}
+
 export {
   getSelectedShip,
   toggleSelectedShip,
@@ -143,4 +148,5 @@ export {
   rotateShip,
   randomize,
   getShipPackages,
+  deleteShips
 };

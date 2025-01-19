@@ -1,6 +1,7 @@
-import { game } from "../../index.js";
+import { game, resetGame } from "../../gameController.js";
 import { getBoard, hideBoards } from "../boards.js";
 import { currentPlayer, getOpponent, resetActivePlayer } from "../players.js";
+import { deleteShips } from "../ships/ships.js";
 import { removeAllChildren, scrollToTop } from "../utils.js";
 import { disableAttacks } from "./play.js";
 import {
@@ -22,7 +23,7 @@ function declareWinner(winnerName) {
 }
 
 function addPoint(player) {
-  const id = player.id;
+  const { id } = player;
   const container = document.getElementById(`${id}Points`);
   const point = document.createElement("div");
   point.classList.add("point");
@@ -47,6 +48,21 @@ function endGame() {
   promptPlayAgain();
 }
 
+function enableResetButton() {
+  const reset = document.querySelector("#resetGame");
+  reset.addEventListener(
+    "click",
+    () => {
+      confirmEndGame();
+      resetGame();
+      setTimeout(() => {
+        deleteShips();
+      }, 450);
+    },
+    { once: true },
+  );
+}
+
 function clearScores() {
   const scores = document.querySelectorAll(".point-container");
   scores.forEach((container) => removeAllChildren(container));
@@ -55,9 +71,11 @@ function clearScores() {
 function confirmEndGame() {
   scrollToTop();
   toggleInputs();
-  clearOverlays();
-  clearScores();
   resetActivePlayer();
+  setTimeout(() => {
+    clearOverlays();
+    clearScores();
+  }, 450);
 }
 
 function promptPlayAgain() {
@@ -76,7 +94,7 @@ function promptPlayAgain() {
   };
   endGameBtn.onclick = () => {
     confirmEndGame();
-    game.resetGame();
+    resetGame();
   };
 
   setTimeout(() => {
@@ -92,4 +110,5 @@ export {
   endGame,
   clearScores,
   confirmEndGame,
+  enableResetButton,
 };

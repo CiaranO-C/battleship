@@ -156,6 +156,16 @@ main {
   padding: 0px 40px;
 }
 
+#resetGame {
+  grid-row: 3 / 4;
+  grid-column: 2 / 3;
+  height: 50px;
+  margin: 14px;
+  border-radius: 20px;
+  font-family: "Aldrich", sans-serif;
+  font-size: 1rem;
+}
+
 #playerOneHeader,
 #playerTwoHeader {
   grid-column: 1 / 2;
@@ -201,6 +211,7 @@ main {
   align-items: center;
   justify-content: center;
   z-index: 2;
+  flex-direction: column;
   gap: 15px;
 }
 

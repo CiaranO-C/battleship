@@ -1,5 +1,5 @@
 import { getIndexAttributes, markCell } from "./dom/boards.js";
-import { endGame, gameResult } from "./dom/gameManager/end.js";
+import { endGame, gameResult, playAgain } from "./dom/gameManager/end.js";
 import { scrollToGame } from "./dom/gameManager/initial.js";
 import { runGame, switchTurn, validClick } from "./dom/gameManager/play.js";
 import { confirmShips, setupGame } from "./dom/gameManager/setup.js";
@@ -49,8 +49,20 @@ function handleTurn({ target }) {
   }
 }
 
+function handlePlayAgain() {
+  playAgain();
+  game.playAgain();
+}
+
 function resetGame() {
   game = null;
 }
 
-export { game, initialiseGame, handleRunGame, handleTurn, resetGame };
+export {
+  game,
+  initialiseGame,
+  handleRunGame,
+  handleTurn,
+  handlePlayAgain,
+  resetGame,
+};

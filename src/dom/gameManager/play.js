@@ -1,12 +1,15 @@
-import { game } from '../../index.js';
-import { getBoard, getIndexAttributes, hideOverlays, markCell } from "../boards.js";
+import { handleRunGame, handleTurn } from "../../gameController.js";
+import { getBoard, hideOverlays } from "../boards.js";
 import { currentPlayer, getOpponent, switchCurrentPlayer } from "../players.js";
-import { allShipsPlaced, hideShips } from "../ships/ships.js";
-import { disableSetup } from './setup.js';
+import { hideShips } from "../ships/ships.js";
+import { isOnePlayer } from "../utils.js";
+import { disableSetup } from "./setup.js";
 import { clearOverlays, passDevice } from "./utils.js";
 
 function runGame() {
-  const onePlayer = document.querySelector(".selected").id === "computer";
+  const onePlayer = isOnePlayer();
+  toggleBoardListeners();
+  clearOverlays();
   if (onePlayer) {
     hideOverlays();
   } else {
@@ -19,12 +22,7 @@ function runGame() {
 
 function enablePlayButton() {
   const playButton = document.getElementById("playButton");
-  playButton.addEventListener("click", () => {
-    if (allShipsPlaced()) {
-      clearOverlays();
-      game.run();
-    }
-  });
+  playButton.addEventListener("click", handleRunGame);
 }
 
 function validClick(target) {
@@ -36,30 +34,19 @@ function validClick(target) {
   return false;
 }
 
-function handleAttack(event) {
-  const target = event.target;
-  if (validClick(target)) {
-    const coords = getIndexAttributes(target);
-    const cellAttacked = game.sendAttack(coords);
-    if (cellAttacked) {
-      markCell(target, cellAttacked);
-      game.endTurn();
-    }
-  }
-}
-
 function switchTurn() {
   const twoPlayer = document.querySelector(".selected").id !== "computer";
   switchCurrentPlayer();
+  toggleBoardListeners();
   if (twoPlayer) passDevice();
 }
 
 function disableAttacks(board) {
-  board.removeEventListener("click", handleAttack);
+  board.removeEventListener("click", handleTurn);
 }
 
 function enableAttacks(board) {
-  board.addEventListener("click", handleAttack);
+  board.addEventListener("click", handleTurn);
 }
 
 function toggleBoardListeners() {
@@ -70,9 +57,9 @@ function toggleBoardListeners() {
 export {
   runGame,
   enablePlayButton,
-  handleAttack,
   switchTurn,
   enableAttacks,
   disableAttacks,
   toggleBoardListeners,
+  validClick,
 };

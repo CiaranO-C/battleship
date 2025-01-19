@@ -18,14 +18,18 @@ import {
   rotateShip,
   toggleSelectedShip,
 } from "../ships/ships.js";
+import { queryDom } from "../utils.js";
+import { enableResetButton } from "./end.js";
 import { enablePlayButton } from "./play.js";
 import { clearOverlays } from "./utils.js";
 
 function toggleInputs() {
   const inputOne = document.getElementById("playerOneName");
   const inputTwo = document.getElementById("playerTwoName");
+  console.log(inputOne.getAttribute("readonly"));
+
   [inputOne, inputTwo].forEach((input) => {
-    if (input.readOnly) {
+    if (input.getAttribute("readonly")) {
       input.removeAttribute("readonly");
     } else {
       input.setAttribute("readonly", true);
@@ -54,10 +58,8 @@ function renderBoards() {
   const boards = document.querySelectorAll(".board");
   boards.forEach((board) => renderPlayerBoard(board, boardSize));
 
-  const overlays = document.querySelectorAll(".overlay");
-  overlays.forEach((overlay) => {
-    overlay.classList.toggle("hidden");
-  });
+  getOpponent().querySelector(".overlay").classList.remove("hidden");
+  currentPlayer().querySelector(".overlay").classList.add("hidden");
 }
 
 function renderDockedShips() {
@@ -124,28 +126,20 @@ function disableSetup() {
 
 function confirmShips() {
   if (allShipsPlaced()) {
-    const onePlayer = document.querySelector(".selected").id === "computer";
-    let ships;
+    const twoPlayer = document.querySelector(".selected").id !== "computer";
     let shipPacks;
-    if (onePlayer) {
-      ships = getPlayerShips(document.querySelector("#playerOne"));
-      shipPacks = getShipPackages(ships);
-      console.log(shipPacks);
-    } else {
-      const playerOneShips = getPlayerShips(
-        document.querySelector("#playerOne"),
-      );
-      const playerTwoShips = getPlayerShips(
-        document.querySelector("#playerTwo"),
-      );
 
-      ships = [playerOneShips, playerTwoShips];
-      const packOne = getShipPackages(playerOneShips);
-      const packTwo = getShipPackages(playerTwoShips);
-      shipPacks = { packOne, packTwo };
+    const pOneShips = getPlayerShips(queryDom("#playerOne"));
+    shipPacks = getShipPackages(pOneShips);
+
+    if (twoPlayer) {
+      const pTwoShips = getPlayerShips(queryDom("#playerTwo"));
+      shipPacks = { packOne: shipPacks, packTwo: getShipPackages(pTwoShips) };
     }
+
     return shipPacks;
   }
+  return false;
 }
 
 function placeShips() {
@@ -234,11 +228,12 @@ function shipButtons(player) {
 }
 
 function setupGame() {
-  toggleInputs();
-  renderPlayerNames();
+  toggleInputs(); //sets landing inputs to readonly
+  renderPlayerNames(); //takes input values and renders as board headers
   renderBoards();
   renderDockedShips();
-  placeShips();
+  placeShips(); //enables ship placing for first player
+  enableResetButton();
 }
 
 export {

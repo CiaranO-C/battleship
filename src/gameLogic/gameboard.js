@@ -1,5 +1,5 @@
 import { Ship } from "./ship.js";
-import { sumLengths, arrayOfLengths, shipsData } from "../shipsData.js";
+import { sumLengths, shipsData } from "../shipsData.js";
 import Cell from "./gridCell.js";
 
 export function Board() {
@@ -7,7 +7,7 @@ export function Board() {
   const missedAttacks = [];
   let totalHits = 0;
 
-  function resetBoard(){
+  function resetBoard() {
     totalHits = 0;
     board = buildBoard();
   }
@@ -64,8 +64,8 @@ export function Board() {
   }
 
   function placeShip(ship, i, j) {
-    
     const validCells = validatePosition(ship, i, j);
+   
 
     if (validCells && validCells.length !== 0) {
       validCells.forEach((coordinates) => {
@@ -94,8 +94,8 @@ export function Board() {
     if (validateCoords(i, j)) {
       let shipEnd;
       const shipLength = ship.getLength();
-      let validCells = [];
       
+      let validCells = [];
 
       if (ship.isVertical()) {
         shipEnd = i + shipLength;
@@ -113,10 +113,6 @@ export function Board() {
       }
       return validCells;
     }
-  }
-
-  function printBoard() {
-    console.table(board);
   }
 
   function recieveAttack(i, j) {
@@ -148,7 +144,7 @@ export function Board() {
   }
 
   function getCell(i, j) {
-    if(i > 9 || i < 0 || j > 9 || j < 0) return false
+    if (i > 9 || i < 0 || j > 9 || j < 0) return false;
     return board[i][j];
   }
   return {
@@ -156,7 +152,6 @@ export function Board() {
     getBoard,
     buildBoard,
     placeShip,
-    printBoard,
     randomize,
     getCell,
     recieveAttack,

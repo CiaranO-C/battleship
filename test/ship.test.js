@@ -1,4 +1,4 @@
-import { Ship } from "../src/gameLogic/ship";
+import { Ship } from "../src/gameLogic/ship.js";
 
 describe("test ship object methods", () => {
   let testShip;

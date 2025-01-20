@@ -50,7 +50,6 @@ export function Computer() {
       validTarget = game.validateOpponentBoard(target);
     }
     if (previousHits.length > 0) resetHits();
-    console.log("random target");
     return target;
   }
 
@@ -92,7 +91,6 @@ export function Computer() {
     const validTarget = game.validateOpponentBoard(next);
 
     if (!validTarget) return false;
-    console.log("next target");
     return next;
   }
 
@@ -115,7 +113,6 @@ export function Computer() {
     const validTarget = game.validateOpponentBoard(opposite);
 
     if (!validTarget) return false;
-    console.log("opposite target");
     //if opposite is a miss this forces random targeting to resume on following turn
     overWriteHits();
     return opposite;
@@ -138,7 +135,6 @@ export function Computer() {
   }
 
   function getAdjacentTarget() {
-    console.log("adjacent target");
     const adjacents = getAdjacents();
     const adjIndex = Math.floor(Math.random() * adjacents.length);
     const target = adjacents[adjIndex];
@@ -156,7 +152,6 @@ export function Computer() {
     } else {
       target = getNextTarget() || getOppositeTarget() || getRandomTarget();
     }
-    console.log("queueing -> ", target);
     enqueue(target);
   }
 

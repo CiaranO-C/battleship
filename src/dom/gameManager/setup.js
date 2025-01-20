@@ -31,7 +31,6 @@ import { clearOverlays } from "./utils.js";
 function toggleInputs() {
   const inputOne = document.getElementById("playerOneName");
   const inputTwo = document.getElementById("playerTwoName");
-  console.log(inputOne.getAttribute("readonly"));
 
   [inputOne, inputTwo].forEach((input) => {
     if (input.getAttribute("readonly")) {

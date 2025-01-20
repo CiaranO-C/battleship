@@ -86,7 +86,6 @@ function Game(playerOneName, playerTwoName) {
   }
 
   function confirmAllShips(shipPackages) {
-    console.log(shipPackages);
 
     if (shipPackages) {
       let playerOneShips;

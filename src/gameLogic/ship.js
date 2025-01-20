@@ -49,5 +49,3 @@ export function Ship(typeOfShip, size, axis) {
     isVertical,
   };
 }
-
-//module.exports = { Ship };

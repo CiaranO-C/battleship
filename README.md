@@ -1,7 +1,9 @@
 # ⚓ Battleship ⚓  
 
 ## Play!
-Follow the link to test your mettle! [Battleship](https://battleship-seven-gamma.vercel.app/)
+Follow the link to test your mettle! [Battleship](https://battleship-seven-gamma.vercel.app/) 
+
+ pssst... if you want to beat the computer easily check the console!
 
 ## Overview  
 This is a classic Battleship game built using vanilla JavaScript and CSS, created as one of my earlier projects while learning web development. The game is fully functional, featuring interactive gameplay against a computer opponent with basic game AI (lots of if else!), or a local two player mode. Players can position their ships, attack their opponent, and aim to sink all the enemy ships to win.  

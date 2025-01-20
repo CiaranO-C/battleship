@@ -14,6 +14,16 @@ function Game(playerOneName, playerTwoName) {
     let playerTwo;
     if (playerTwoName.id === "computer") {
       playerTwo = Computer();
+      console.log(
+        "%c🤖 Computer Positions 🤖",
+        "font-size: 15px; font-weight: bold; color: black;",
+      );
+
+      console.table(
+        playerTwo.board
+          .getBoard()
+          .map((row) => row.map((cell) => (cell.hasShip() ? "X" : ""))),
+      );
     } else {
       playerTwo = Player();
       playerTwo.setName(playerTwoName.value);
@@ -24,11 +34,6 @@ function Game(playerOneName, playerTwoName) {
 
   function playTurn() {
     if (currentPlayer.isComputer()) {
-      console.table(
-        playerTwo.board
-          .getBoard()
-          .map((row) => row.map((cell) => cell.hasShip())),
-      );
       computerTurn();
     }
   }
@@ -86,7 +91,6 @@ function Game(playerOneName, playerTwoName) {
   }
 
   function confirmAllShips(shipPackages) {
-
     if (shipPackages) {
       let playerOneShips;
       if (playerTwo.isComputer()) {
